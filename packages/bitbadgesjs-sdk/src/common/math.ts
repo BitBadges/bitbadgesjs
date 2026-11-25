@@ -15,12 +15,12 @@ export const GO_MAX_UINT_64 = 18446744073709551615n;
  *
  * @category Math
  */
-export function safeAdd<T extends NumberType>(a: T, b: T): T {
+export function safeAdd<T extends NumberType>(a: T, b: T, allowNegative = false): T {
   if (typeof a !== typeof b) {
     throw new Error('mismatched types for uint64 addition');
   }
 
-  if (BigInt(a) < 0n || BigInt(b) < 0n) {
+  if (!allowNegative && (BigInt(a) < 0n || BigInt(b) < 0n)) {
     throw new Error('Negative inputs are not allowed for uint64 addition');
   }
 
