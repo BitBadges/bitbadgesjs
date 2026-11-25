@@ -345,13 +345,16 @@ export async function handleAnalyzeCollection(input: AnalyzeCollectionInput): Pr
     const collection = response.data.collections[0] as Record<string, unknown>;
 
     // Extract basic info
+    // The indexer returns `collectionMetadata` / `validTokenIds`; the
+    // `*Timeline` / `validBadgeIds` names are pre-rename and kept as fallbacks.
     const metadataTimeline = collection.collectionMetadataTimeline as Array<Record<string, unknown>> | undefined;
-    const metadata = (metadataTimeline?.[0]?.collectionMetadata as Record<string, unknown>)?.metadata as Record<string, unknown> | undefined;
+    const metadata = ((collection.collectionMetadata as Record<string, unknown> | undefined)?.metadata ??
+      (metadataTimeline?.[0]?.collectionMetadata as Record<string, unknown>)?.metadata) as Record<string, unknown> | undefined;
     const name = (metadata?.name as string) || 'Unnamed';
     const description = (metadata?.description as string) || '';
     const manager = (collection.manager as string) || '';
     const standards = (collection.standards as string[]) || [];
-    const validBadgeIds = collection.validBadgeIds as Array<{ start: string; end: string }> | undefined;
+    const validBadgeIds = (collection.validTokenIds ?? collection.validBadgeIds) as Array<{ start: string; end: string }> | undefined;
     const invariants = (collection.invariants as Record<string, unknown>) || {};
     const collType = detectCollectionType(collection);
 

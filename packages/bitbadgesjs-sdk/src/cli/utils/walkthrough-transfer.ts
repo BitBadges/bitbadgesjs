@@ -198,7 +198,9 @@ export async function runTransferWalkthrough(input: TransferWalkthroughInput): P
     throw new Error(collResp.error || `Collection ${collectionId} not found`);
   }
   const collection = collResp.data.collections[0] as any;
-  const validBadgeIds = (collection.validBadgeIds as Array<{ start: string; end: string }>) || [{ start: '1', end: '1' }];
+  const validBadgeIds = ((collection.validTokenIds ?? collection.validBadgeIds) as Array<{ start: string; end: string }>) || [
+    { start: '1', end: '1' }
+  ];
   const collectionApprovals = (collection.collectionApprovals as any[]) || [];
 
   // ── Fetch user-level approvals ───────────────────────────────────
