@@ -450,7 +450,7 @@ export function subtractBalances<T extends NumberType>(
 function setBalance<T extends NumberType>(newBalance: iBalance<T>, balances: iBalance<T>[]): BalanceArray<T> {
   let newBalances = BalanceArray.From(balances).clone();
 
-  if (newBalance.amount === 0n) {
+  if (BigInt(newBalance.amount) === 0n) {
     return newBalances;
   }
 
@@ -464,7 +464,7 @@ function setBalance<T extends NumberType>(newBalance: iBalance<T>, balances: iBa
 function setBalances<T extends NumberType>(newBalances: iBalance<T>[], balances: iBalance<T>[]): BalanceArray<T> {
   let newBalancesArr = BalanceArray.From(balances).clone();
 
-  newBalancesArr.push(...newBalances.filter((x) => x.amount !== 0n));
+  newBalancesArr.push(...newBalances.filter((x) => BigInt(x.amount) !== 0n));
   newBalancesArr = cleanBalances(newBalancesArr);
   newBalancesArr = sortBalancesByAmount(newBalancesArr);
 
@@ -656,7 +656,8 @@ function deleteBalances<T extends NumberType>(
 export function sortBalancesByAmount<T extends NumberType>(balances: iBalance<T>[]) {
   return BalanceArray.From(
     balances.sort((a, b) => {
-      return a.amount > b.amount ? 1 : -1;
+      const diff = BigInt(a.amount) - BigInt(b.amount);
+      return diff > 0n ? 1 : diff < 0n ? -1 : 0;
     })
   );
 }
@@ -678,13 +679,15 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
   const newBalances: BalanceArray<T> = BalanceArray.From([]);
   for (let i = 0; i < balances.length; i++) {
     const currBalance = balances[i];
+    const currAmount = BigInt(currBalance.amount);
 
     let merged = false;
     for (let j = 0; j < newBalances.length; j++) {
       const newBalance = newBalances[j];
+      const newAmount = BigInt(newBalance.amount);
 
       //If the balances are equal, we merge them
-      if (currBalance.amount == newBalance.amount) {
+      if (currAmount === newAmount) {
         //If the balances are equal, we merge them
         if (uintRangeArrsEqual(currBalance.tokenIds, newBalance.tokenIds)) {
           newBalance.ownershipTimes.push(...currBalance.ownershipTimes);
@@ -697,8 +700,7 @@ export function cleanBalances<T extends NumberType>(balancesArr: iBalance<T>[]) 
           merged = true;
           break;
         }
-      } else if (currBalance.amount > newBalance.amount) {
-        j = newBalances.length;
+      } else if (currAmount < newAmount) {
         break;
       }
     }
@@ -817,7 +819,7 @@ export function uintRangeArrsEqual<T extends NumberType>(arr1: UintRangeArray<T>
   }
 
   for (let i = 0; i < arr1.length; i++) {
-    if (arr1[i].start !== arr2[i].start || arr1[i].end !== arr2[i].end) {
+    if (BigInt(arr1[i].start) !== BigInt(arr2[i].start) || BigInt(arr1[i].end) !== BigInt(arr2[i].end)) {
       return false;
     }
   }

@@ -144,3 +144,65 @@ describe('helpers', () => {
     expect(cosmosPercentToString(0.123, 1)).toBe('12.3%');
   });
 });
+
+describe('CosmosCoinUtils — high-decimal BigInt scaling, signs, carry, rounding, and scientific notation', () => {
+  const DEC18 = { symbol: 'ETH', decimals: 18 } as any;
+
+  it('scales 18-decimal amounts using exact BigInt powers of 10 without float precision loss', () => {
+    const c = CosmosCoinUtils.fromRawAmount('1000000000000000001', 'aeth', DEC18);
+    expect(c.getDisplayAmountString()).toBe('1.000000000000000001');
+    expect(CosmosCoinUtils.fromDisplayAmount('1.000000000000000001', 'aeth', 18, DEC18).amount).toBe(1000000000000000001n);
+  });
+
+  it('formats negative amounts cleanly without double minus signs', () => {
+    expect(CosmosCoinUtils.fromRawAmount('-1500000', 'ibc/usdc', USDC_DETAILS).getDisplayAmountString()).toBe('-1.500000');
+    expect(CosmosCoinUtils.fromRawAmount('-500000', 'ibc/usdc', USDC_DETAILS).getDisplayAmountString()).toBe('-0.500000');
+    expect(CosmosCoinUtils.fromRawAmount('-1000000', 'ibc/usdc', USDC_DETAILS).getDisplayAmountString()).toBe('-1');
+    expect(CosmosCoinUtils.fromRawAmount('-1999000', 'ibc/usdc', USDC_DETAILS).getDisplayAmountString(2, RoundingMode.ROUND_UP)).toBe('-2.00');
+  });
+
+  it('propagates carry cleanly when rounding decimal digits overflows into integer part', () => {
+    const c = CosmosCoinUtils.fromRawAmount('1999000', 'ibc/usdc', USDC_DETAILS);
+    expect(c.getDisplayAmountString(2, RoundingMode.ROUND_UP)).toBe('2.00');
+    expect(c.getDisplayAmountString(0, RoundingMode.ROUND_UP)).toBe('2');
+
+    const c2 = CosmosCoinUtils.fromRawAmount('1000001', 'ibc/usdc', USDC_DETAILS);
+    expect(c2.getDisplayAmountString(2, RoundingMode.ROUND_UP)).toBe('1.01');
+    expect(c2.getDisplayAmountString(2, RoundingMode.ROUND_DOWN)).toBe('1.00');
+  });
+
+  it('honors ROUND_HALF_UP, ROUND_HALF_DOWN, and ROUND_HALF_EVEN in display and parse', () => {
+    // 1.25 -> 1 dp
+    const half = CosmosCoinUtils.fromRawAmount('1250000', 'ibc/usdc', USDC_DETAILS);
+    expect(half.getDisplayAmountString(1, RoundingMode.ROUND_HALF_UP)).toBe('1.3');
+    expect(half.getDisplayAmountString(1, RoundingMode.ROUND_HALF_DOWN)).toBe('1.2');
+    expect(half.getDisplayAmountString(1, RoundingMode.ROUND_HALF_EVEN)).toBe('1.2');
+
+    // 1.35 -> 1 dp (3 is odd -> ROUND_HALF_EVEN rounds to 1.4)
+    const halfOdd = CosmosCoinUtils.fromRawAmount('1350000', 'ibc/usdc', USDC_DETAILS);
+    expect(halfOdd.getDisplayAmountString(1, RoundingMode.ROUND_HALF_EVEN)).toBe('1.4');
+
+    // fromDisplayAmount with exact half
+    expect(CosmosCoinUtils.fromDisplayAmount('1.0000005', 'ibc/usdc', 6, USDC_DETAILS, RoundingMode.ROUND_HALF_UP).amount).toBe(1000001n);
+    expect(CosmosCoinUtils.fromDisplayAmount('1.0000005', 'ibc/usdc', 6, USDC_DETAILS, RoundingMode.ROUND_HALF_DOWN).amount).toBe(1000000n);
+    expect(CosmosCoinUtils.fromDisplayAmount('1.0000005', 'ibc/usdc', 6, USDC_DETAILS, RoundingMode.ROUND_HALF_EVEN).amount).toBe(1000000n);
+    expect(CosmosCoinUtils.fromDisplayAmount('1.0000015', 'ibc/usdc', 6, USDC_DETAILS, RoundingMode.ROUND_HALF_EVEN).amount).toBe(1000002n);
+  });
+
+  it('parses scientific notation in fromDisplayAmount, multiply, and divide', () => {
+    expect(CosmosCoinUtils.fromDisplayAmount(1e-7, 'aeth', 18, DEC18).amount).toBe(100000000000n);
+    expect(CosmosCoinUtils.fromDisplayAmount('1.5e-6', 'ibc/usdc', 6, USDC_DETAILS, RoundingMode.ROUND_UP).amount).toBe(2n);
+    expect(CosmosCoinUtils.fromDisplayAmount('1e21', 'ubadge', 0).amount).toBe(10n ** 21n);
+
+    const big = CosmosCoinUtils.fromRawAmount('1000000000', 'ibc/usdc', USDC_DETAILS);
+    expect(big.multiply(1e-7).amount).toBe(100n);
+    expect(big.divide(1e-7).amount).toBe(10000000000000000n);
+  });
+
+  it('rejects malformed decimal strings and division by zero', () => {
+    expect(() => CosmosCoinUtils.fromDisplayAmount('1.5.9', 'ibc/usdc', 6)).toThrow(/Invalid decimal/);
+    expect(() => CosmosCoinUtils.fromDisplayAmount('', 'ibc/usdc', 6)).toThrow(/Invalid decimal/);
+    expect(() => CosmosCoinUtils.fromDisplayAmount(Number.NaN, 'ibc/usdc', 6)).toThrow(/Invalid decimal/);
+    expect(() => CosmosCoinUtils.fromRawAmount('100', 'ibc/usdc').divide(0)).toThrow(/Division by zero/);
+  });
+});

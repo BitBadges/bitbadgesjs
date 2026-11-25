@@ -162,15 +162,24 @@ export const isSubscriptionFaucetApproval = (approval: iCollectionApproval<bigin
     return false;
   }
 
-  const allDenoms = [...new Set(approvalCriteria.coinTransfers.map((coinTransfer) => coinTransfer.coins.map((coin) => coin.denom)).flat())];
-  if (allDenoms.length > 1) {
-    return false;
-  }
-
+  const allDenoms = new Set<string>();
   for (const coinTransfer of approvalCriteria.coinTransfers) {
+    if (!coinTransfer.coins || coinTransfer.coins.length === 0) {
+      return false;
+    }
     if (coinTransfer.overrideFromWithApproverAddress || coinTransfer.overrideToWithInitiator) {
       return false;
     }
+    for (const coin of coinTransfer.coins) {
+      if (!coin.denom) {
+        return false;
+      }
+      allDenoms.add(coin.denom);
+    }
+  }
+
+  if (allDenoms.size !== 1) {
+    return false;
   }
 
   const incrementedBalances = approvalCriteria.predeterminedBalances?.incrementedBalances;
@@ -456,10 +465,11 @@ export function userRecurringApproval(args: UserRecurringApprovalArgs): iUserInc
   const chargePeriodLength =
     intervalLength < RECURRING_CHARGE_PERIOD_CAP_MS ? intervalLength : RECURRING_CHARGE_PERIOD_CAP_MS;
 
-  let subscriptionAmount = 0n;
-  for (const coinTransfer of subscriptionApproval.approvalCriteria?.coinTransfers ?? []) {
-    subscriptionAmount += BigInt(coinTransfer.coins[0].amount);
-  }
+  const subscriptionAmount = (subscriptionApproval.approvalCriteria?.coinTransfers ?? []).reduce(
+    (total, coinTransfer) =>
+      total + (coinTransfer.coins ?? []).reduce((sum, coin) => sum + BigInt(coin.amount), 0n),
+    0n
+  );
 
   // Return proto-shape iUserIncomingApproval (no fromList / initiatedByList
   // class-instance fields and no details. The chain binary's strict-JSON

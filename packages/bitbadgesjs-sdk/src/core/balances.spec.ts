@@ -2,15 +2,18 @@ import {
   BalanceArray,
   areBalancesEqual,
   addBalances,
+  cleanBalances,
   getBalancesForIds,
   doBalancesExceedThreshold,
   addBalancesAndCheckIfExceedsThreshold,
-  handleDuplicateTokenIdsInBalances
+  handleDuplicateTokenIdsInBalances,
+  sortBalancesByAmount,
+  updateBalances
 } from './balances.js';
 import { UserPermissions } from './permissions.js';
 import { UintRangeArray } from './uintRanges.js';
 import { UserBalanceStore } from './userBalances.js';
-import { safeAdd, GO_MAX_UINT_64, safeSubtract } from '../common/math.js';
+import { bigIntMax, bigIntMin, safeAdd, GO_MAX_UINT_64, safeSubtract } from '../common/math.js';
 
 BigInt.prototype.toJSON = function () {
   return this.toString();
@@ -231,5 +234,48 @@ describe('BalancesWithTimesFuzz', () => {
 
     expect(handled.length).toEqual(1);
     expect(handled[0].amount).toEqual(2n);
+  });
+
+  it('bigIntMin / bigIntMax compare decimal strings numerically and safeAdd rejects negative inputs', () => {
+    expect(bigIntMin('10', '2')).toBe('2');
+    expect(bigIntMax('10', '2')).toBe('10');
+    expect(bigIntMin('99999999999999999999', '100000000000000000000')).toBe('99999999999999999999');
+    expect(bigIntMax('99999999999999999999', '100000000000000000000')).toBe('100000000000000000000');
+    expect(bigIntMin(10n, 2n)).toBe(2n);
+    expect(bigIntMax(10n, 2n)).toBe(10n);
+
+    expect(() => safeAdd(-1n, 2n)).toThrow(/Negative/);
+    expect(() => safeAdd('-1', '2')).toThrow(/Negative/);
+    expect(() => safeAdd(1, -2)).toThrow(/Negative/);
+  });
+
+  it('sorts, cleans, and filters zero string-typed balances numerically', () => {
+    const sorted = sortBalancesByAmount<string>([
+      { amount: '10', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '10' }] },
+      { amount: '2', tokenIds: [{ start: '2', end: '2' }], ownershipTimes: [{ start: '1', end: '10' }] },
+      { amount: '100', tokenIds: [{ start: '3', end: '3' }], ownershipTimes: [{ start: '1', end: '10' }] }
+    ]);
+    expect(sorted.map((b) => b.amount)).toEqual(['2', '10', '100']);
+
+    const cleaned = cleanBalances<string>([
+      { amount: '2', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '10' }] },
+      { amount: '10', tokenIds: [{ start: '2', end: '2' }], ownershipTimes: [{ start: '1', end: '10' }] },
+      { amount: '10', tokenIds: [{ start: '3', end: '3' }], ownershipTimes: [{ start: '1', end: '10' }] }
+    ]);
+    expect(cleaned).toHaveLength(2);
+    expect(cleaned[1].amount).toBe('10');
+    expect(cleaned[1].tokenIds).toEqual([{ start: '2', end: '3' }]);
+
+    const afterZeroUpdate = updateBalances<string>(
+      { amount: '0', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '10' }] },
+      [{ amount: '5', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '10' }] }]
+    );
+    expect(afterZeroUpdate).toHaveLength(0);
+
+    const afterZeroAdd = addBalances<string>(
+      [{ amount: '0', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '10' }] }],
+      []
+    );
+    expect(afterZeroAdd).toHaveLength(0);
   });
 });

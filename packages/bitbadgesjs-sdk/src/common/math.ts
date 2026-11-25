@@ -20,6 +20,10 @@ export function safeAdd<T extends NumberType>(a: T, b: T): T {
     throw new Error('mismatched types for uint64 addition');
   }
 
+  if (BigInt(a) < 0n || BigInt(b) < 0n) {
+    throw new Error('Negative inputs are not allowed for uint64 addition');
+  }
+
   //Takes a little hardcoding to make the types work
   let result: T;
   if (typeof a === 'bigint' && typeof b === 'bigint') {
@@ -164,7 +168,7 @@ export function safeMultiplyKeepRight<T extends NumberType>(left: NumberType, ri
  * @category Math
  */
 export function bigIntMin<T extends NumberType>(a: T, b: T): T {
-  return a > b ? b : a;
+  return BigInt(a) > BigInt(b) ? b : a;
 }
 
 /**
@@ -173,5 +177,5 @@ export function bigIntMin<T extends NumberType>(a: T, b: T): T {
  * @category Math
  */
 export function bigIntMax<T extends NumberType>(a: T, b: T): T {
-  return a > b ? a : b;
+  return BigInt(a) > BigInt(b) ? a : b;
 }

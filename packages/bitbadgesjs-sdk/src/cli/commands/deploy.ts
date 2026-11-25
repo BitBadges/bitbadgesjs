@@ -27,9 +27,6 @@
 import { Command } from 'commander';
 import { spawnSync } from 'node:child_process';
 import * as fs from 'fs';
-import * as os from 'node:os';
-import * as path from 'node:path';
-import * as crypto from 'node:crypto';
 
 import { addNetworkOptions, getApiUrl, getApiKeyForNetwork, resolveNetwork } from '../utils/io.js';
 import { NETWORK_CONFIGS, type NetworkMode } from '../../signing/types.js';
@@ -154,29 +151,19 @@ async function fetchTxResult(nodeUrl: string, txHash: string): Promise<ChainTxRe
 }
 
 /**
- * Write the chain-binary command line to a tmp script and `bash`-exec it.
+ * Execute the chain binary directly without invoking an intermediate shell.
  * stdin + stderr are inherited so keyring password prompts and gas
  * estimates surface on the user's TTY; stdout is captured so we can
- * regex out the txhash(es). Matches the harness pattern at
- * `cli/integration/harness/chain.ts`.
+ * parse the txhash(es).
  */
-function execKeyringScript(commandLine: string): { stdout: string; status: number } {
-  const scriptPath = path.join(os.tmpdir(), `bb-deploy-${crypto.randomBytes(4).toString('hex')}.sh`);
-  fs.writeFileSync(scriptPath, commandLine + '\n', { mode: 0o700 });
-  try {
-    const result = spawnSync('bash', [scriptPath], {
-      stdio: ['inherit', 'pipe', 'inherit'],
-      encoding: 'utf-8',
-      timeout: 120_000
-    });
-    return { stdout: String(result.stdout ?? ''), status: result.status ?? 1 };
-  } finally {
-    try {
-      fs.unlinkSync(scriptPath);
-    } catch {
-      /* best-effort cleanup */
-    }
-  }
+export function execKeyringCommand(binary: string, args: string[]): { stdout: string; status: number } {
+  const result = spawnSync(binary, args, {
+    shell: false,
+    stdio: ['inherit', 'pipe', 'inherit'],
+    encoding: 'utf-8',
+    timeout: 120_000
+  });
+  return { stdout: String(result.stdout ?? ''), status: result.status ?? 1 };
 }
 
 function sleep(ms: number): Promise<void> {
@@ -200,7 +187,7 @@ export class KeyringBindError extends Error {
 export async function executeKeyringMultiSteps(
   steps: KeyringMultiCommandStep[],
   deps: {
-    runStep: (commandLine: string) => Promise<{ hash: string; result: ChainTxResult | undefined }>;
+    runStep: (commandLine: string, step: KeyringMultiCommandStep) => Promise<{ hash: string; result: ChainTxResult | undefined }>;
     sleepImpl?: (ms: number) => Promise<void>;
     quiet?: boolean;
   }
@@ -210,7 +197,7 @@ export async function executeKeyringMultiSteps(
 
   for (let i = 0; i < steps.length; i++) {
     const step = steps[i];
-    const ran = await deps.runStep(step.commandLine);
+    const ran = await deps.runStep(step.commandLine, step);
     execResults.push({ txHash: ran.hash, result: ran.result });
 
     if ((ran.result?.code ?? -1) !== 0) {
@@ -759,6 +746,18 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     let commandLine: string;
     let msgFilePaths: string[];
     let multiSteps: ReturnType<typeof buildKeyringMultiCommand>['steps'] | undefined;
+    let singleBinary = sharedKeyringOpts.binary;
+    let singleArgs: string[] = [];
+    let tmpDir: string | undefined;
+    const cleanupTmpDir = () => {
+      if (!tmpDir) return;
+      try {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      } catch {
+        /* best-effort cleanup */
+      }
+      tmpDir = undefined;
+    };
     const needsCreatedCollectionBind = isMultiMsg && bundleNeedsCreatedCollectionBind(messages);
     try {
       if (isMultiMsg) {
@@ -766,12 +765,17 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
         commandLine = r.commandLine;
         msgFilePaths = r.msgFilePaths;
         multiSteps = r.steps;
+        tmpDir = r.tmpDir;
       } else {
         const r = buildKeyringCommand({ msg, ...sharedKeyringOpts });
         commandLine = r.commandLine;
         msgFilePaths = [r.msgFilePath];
+        singleBinary = r.binary;
+        singleArgs = r.args;
+        tmpDir = r.tmpDir;
       }
     } catch (err: any) {
+      cleanupTmpDir();
       process.stderr.write(`${err?.message || err}\n`);
       process.exit(2);
     }
@@ -782,6 +786,7 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
     // commits, so a script that still carries collectionId "0" would
     // resolve to whichever collection is newest when the next tx lands.
     if (!useExec && needsCreatedCollectionBind) {
+      cleanupTmpDir();
       process.stderr.write(PRINT_ONLY_PLACEHOLDER_ERROR);
       process.exit(2);
     }
@@ -810,35 +815,23 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       process.exit(0);
     }
 
-    // --exec path: run the printed command in place and emit a JSON
+    // --exec path: run the chain binary directly and emit a JSON
     // envelope that matches the burner/browser shape. stdin + stderr
     // inherit so keyring password prompts work; stdout is captured so
     // we can pluck the txhash(es). Multi-msg still runs as sequential
     // txs (NOT atomic) because the chain binary takes one msg per
     // subcommand; --exec runs each step on its own so a later msg
     // with collectionId "0" can be rewritten after the create commits.
-    if (isMultiMsg && !process.env.BB_QUIET) {
-      process.stderr.write(
-        '\nMulti-msg --exec: running ' + messages.length + ' sequential tx(s) with 6s sleeps between blocks.\n' +
-          'NOT atomic — if a later step fails on-chain, earlier steps stay committed.\n' +
-          (needsCreatedCollectionBind
-            ? 'Later messages that used collectionId "0" will be rewritten with the new collection id from the create tx.\n'
-            : '') +
-          'For atomic multi-msg, use --browser instead.\n\n'
-      );
-    } else if (!process.env.BB_QUIET) {
-      process.stderr.write(`\nExecuting (msg JSON at ${msgFilePaths[0]})...\n\n`);
-    }
-
     const { emit, emitError, BBErrorCode } = await import('../utils/envelope.js');
     const hashes: string[] = [];
     const execResults: Array<{ txHash: string; result: ChainTxResult | undefined }> = [];
 
-    const runOneCommand = async (oneCommandLine: string): Promise<{ hash: string; result: ChainTxResult | undefined }> => {
-      const execResult = execKeyringScript(oneCommandLine);
+    const runOneCommand = async (binary: string, args: string[]): Promise<{ hash: string; result: ChainTxResult | undefined }> => {
+      const execResult = execKeyringCommand(binary, args);
       const txHashMatches = [...execResult.stdout.matchAll(/txhash:\s*([A-F0-9]+)/gi)];
       const stepHashes = txHashMatches.map((m) => m[1]);
       if (execResult.status !== 0 || stepHashes.length === 0) {
+        cleanupTmpDir();
         process.stderr.write(
           `\n--exec failed (chain-binary exit ${execResult.status}, ${stepHashes.length} txhash(es) parsed from stdout).\n` +
             (execResult.stdout ? `--- stdout (first 800 chars) ---\n${execResult.stdout.slice(0, 800)}\n` : '')
@@ -864,33 +857,51 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       return { hash, result };
     };
 
-    if (isMultiMsg && multiSteps && multiSteps.length > 0) {
-      try {
-        const multiResults = await executeKeyringMultiSteps(multiSteps, {
-          runStep: runOneCommand,
-          sleepImpl: sleep,
-          quiet: Boolean(process.env.BB_QUIET)
-        });
-        for (const r of multiResults) {
-          hashes.push(r.txHash);
-          execResults.push(r);
-        }
-      } catch (err) {
-        if (err instanceof KeyringBindError) {
-          process.stderr.write(`\n${err.message}\n`);
-          emitError(err, {
-            code: BBErrorCode.BROADCAST_FAILED,
-            meta: err.meta,
-            exitCode: 1
-          });
-          return process.exit(1);
-        }
-        throw err;
+    try {
+      if (isMultiMsg && !process.env.BB_QUIET) {
+        process.stderr.write(
+          '\nMulti-msg --exec: running ' + messages.length + ' sequential tx(s) with 6s sleeps between blocks.\n' +
+            'NOT atomic — if a later step fails on-chain, earlier steps stay committed.\n' +
+            (needsCreatedCollectionBind
+              ? 'Later messages that used collectionId "0" will be rewritten with the new collection id from the create tx.\n'
+              : '') +
+            'For atomic multi-msg, use --browser instead.\n\n'
+        );
+      } else if (!process.env.BB_QUIET) {
+        process.stderr.write(`\nExecuting (msg JSON at ${msgFilePaths[0]})...\n\n`);
       }
-    } else {
-      const ran = await runOneCommand(commandLine);
-      hashes.push(ran.hash);
-      execResults.push({ txHash: ran.hash, result: ran.result });
+
+      if (isMultiMsg && multiSteps && multiSteps.length > 0) {
+        try {
+          const multiResults = await executeKeyringMultiSteps(multiSteps, {
+            runStep: (_cmd, step) => runOneCommand(step.binary, step.args),
+            sleepImpl: sleep,
+            quiet: Boolean(process.env.BB_QUIET)
+          });
+          for (const r of multiResults) {
+            hashes.push(r.txHash);
+            execResults.push(r);
+          }
+        } catch (err) {
+          if (err instanceof KeyringBindError) {
+            cleanupTmpDir();
+            process.stderr.write(`\n${err.message}\n`);
+            emitError(err, {
+              code: BBErrorCode.BROADCAST_FAILED,
+              meta: err.meta,
+              exitCode: 1
+            });
+            return process.exit(1);
+          }
+          throw err;
+        }
+      } else {
+        const ran = await runOneCommand(singleBinary, singleArgs);
+        hashes.push(ran.hash);
+        execResults.push({ txHash: ran.hash, result: ran.result });
+      }
+    } finally {
+      cleanupTmpDir();
     }
 
     // Envelope fields: code / height / events come from the LCD, not the

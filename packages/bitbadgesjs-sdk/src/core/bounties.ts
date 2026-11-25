@@ -7,10 +7,89 @@ export interface BountyValidationResult {
   warnings: string[];
 }
 
+const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+const MAX_UINT64_BI = 18446744073709551615n;
+
+function hasForeverRange(ranges: unknown): boolean {
+  if (!Array.isArray(ranges) || ranges.length === 0) return false;
+  return ranges.some((r: any) => {
+    if (!r || r.start == null || r.end == null) return false;
+    try {
+      return BigInt(r.start) === 1n && BigInt(r.end) === MAX_UINT64_BI;
+    } catch {
+      return false;
+    }
+  });
+}
+
+function isActionPermFrozen(entries: unknown): boolean {
+  if (!Array.isArray(entries) || entries.length === 0) return false;
+  return entries.some(
+    (e: any) =>
+      hasForeverRange(e?.permanentlyForbiddenTimes) &&
+      (!e?.permanentlyPermittedTimes || e.permanentlyPermittedTimes.length === 0)
+  );
+}
+
+function isTokenIdsPermFrozen(entries: unknown): boolean {
+  if (!Array.isArray(entries) || entries.length === 0) return false;
+  return entries.some(
+    (e: any) =>
+      hasForeverRange(e?.tokenIds) &&
+      hasForeverRange(e?.permanentlyForbiddenTimes) &&
+      (!e?.permanentlyPermittedTimes || e.permanentlyPermittedTimes.length === 0)
+  );
+}
+
+function isApprovalPermFrozen(entries: unknown): boolean {
+  if (!Array.isArray(entries) || entries.length === 0) return false;
+  return entries.some(
+    (e: any) =>
+      e?.fromListId === 'All' &&
+      e?.toListId === 'All' &&
+      e?.initiatedByListId === 'All' &&
+      e?.approvalId === 'All' &&
+      hasForeverRange(e?.transferTimes) &&
+      hasForeverRange(e?.tokenIds) &&
+      hasForeverRange(e?.ownershipTimes) &&
+      hasForeverRange(e?.permanentlyForbiddenTimes) &&
+      (!e?.permanentlyPermittedTimes || e.permanentlyPermittedTimes.length === 0)
+  );
+}
+
+function areCollectionPermissionsFrozen(perms: any): boolean {
+  if (!perms || typeof perms !== 'object') return false;
+  const actionFields = [
+    'canDeleteCollection',
+    'canArchiveCollection',
+    'canUpdateStandards',
+    'canUpdateCustomData',
+    'canUpdateManager',
+    'canUpdateCollectionMetadata',
+    'canAddMoreAliasPaths',
+    'canAddMoreCosmosCoinWrapperPaths'
+  ];
+  for (const field of actionFields) {
+    if (!isActionPermFrozen(perms[field])) return false;
+  }
+  if (!isTokenIdsPermFrozen(perms.canUpdateValidTokenIds)) return false;
+  if (!isTokenIdsPermFrozen(perms.canUpdateTokenMetadata)) return false;
+  if (!isApprovalPermFrozen(perms.canUpdateCollectionApprovals)) return false;
+  return true;
+}
+
+function isValidPayoutTarget(to: unknown): to is string {
+  if (typeof to !== 'string') return false;
+  const trimmed = to.trim();
+  if (trimmed.length === 0 || trimmed !== to) return false;
+  if (trimmed === BURN_ADDRESS || trimmed === 'Mint' || trimmed === 'All' || trimmed === 'Total') return false;
+  if (trimmed.startsWith('!') || trimmed.includes(':') || trimmed.startsWith('bbvaloper')) return false;
+  return true;
+}
+
 export const validateBountyCollection = (collection: Readonly<iCollectionDoc<bigint>>): BountyValidationResult => {
   const errors: string[] = [];
   const warnings: string[] = [];
-  const BURN_ADDRESS = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 
   // 1. Standard includes "Bounty"
   if (!collection.standards?.includes('Bounty')) errors.push('Missing "Bounty" standard');
@@ -23,8 +102,13 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
     errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
   }
 
+  // 2b. Collection permissions must be frozen so terms cannot be altered post-creation
+  if (!areCollectionPermissionsFrozen(collection.collectionPermissions)) {
+    errors.push('Collection permissions must be frozen');
+  }
+
   // 3. Exactly 3 collection approvals
-  const approvals = collection.collectionApprovals;
+  const approvals = collection.collectionApprovals ?? [];
   if (approvals.length !== 3) {
     errors.push(`Expected exactly 3 approvals (accept, deny, expire), found ${approvals.length}`);
     return { valid: false, errors, warnings };
@@ -36,12 +120,26 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
     if (a.toListId !== BURN_ADDRESS) errors.push(`Approval "${a.approvalId}": toListId must be burn address`);
   }
 
-  // 5. All 3: maxNumTransfers.overallMaxNumTransfers = 1
+  // 5. All 3: maxNumTransfers.overallMaxNumTransfers = 1 with no periodic reset
   for (const a of approvals) {
     const mnt = a.approvalCriteria?.maxNumTransfers;
     if (!mnt || BigInt(mnt.overallMaxNumTransfers) !== 1n) {
       errors.push(`Approval "${a.approvalId}": overallMaxNumTransfers must be 1`);
+    } else if (BigInt(mnt.resetTimeIntervals?.intervalLength ?? 0) !== 0n) {
+      errors.push(`Approval "${a.approvalId}": maxNumTransfers must not reset periodically`);
     }
+  }
+
+  // 5b. Mutual exclusion / single terminal state across accept, deny, and expire
+  const hasMaxSupplyOne =
+    collection.invariants?.maxSupplyPerId != null && BigInt(collection.invariants.maxSupplyPerId) === 1n;
+  const trackerIds = approvals.map((a) => a.approvalCriteria?.maxNumTransfers?.amountTrackerId ?? '');
+  const hasSharedTracker =
+    trackerIds.every((id) => typeof id === 'string' && id.length > 0) && new Set(trackerIds).size === 1;
+  if (!hasMaxSupplyOne && !hasSharedTracker) {
+    errors.push(
+      'Bounty approvals must enforce terminal-state mutual exclusion via invariants.maxSupplyPerId=1 or a shared amountTrackerId'
+    );
   }
 
   // 6. All 3: overridesFromOutgoingApprovals=true, overridesToIncomingApprovals=true
@@ -63,6 +161,12 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
       if (ct[0].overrideToWithInitiator) {
         errors.push(`Approval "${a.approvalId}": coinTransfer must have overrideToWithInitiator=false`);
       }
+      if (!isValidPayoutTarget(ct[0].to)) {
+        errors.push(`Approval "${a.approvalId}": coinTransfer must specify a valid non-empty recipient address`);
+      }
+      if (!ct[0].coins || ct[0].coins.length !== 1 || !ct[0].coins[0]?.denom || ct[0].coins[0]?.amount == null) {
+        errors.push(`Approval "${a.approvalId}": coinTransfer must specify exactly 1 coin`);
+      }
     }
   }
 
@@ -72,11 +176,35 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
   if (withVoting.length !== 2) errors.push(`Expected 2 approvals with votingChallenges (accept+deny), found ${withVoting.length}`);
   if (withoutVoting.length !== 1) errors.push(`Expected 1 approval without votingChallenges (expire), found ${withoutVoting.length}`);
 
-  // 9. Accept+deny have same verifier and pay to different addresses
+  // 9. Accept+deny have single verifier, positive quorum, distinct proposalIds, and pay to different addresses
   if (withVoting.length === 2) {
-    const v0 = withVoting[0].approvalCriteria?.votingChallenges?.[0]?.voters?.[0]?.address;
-    const v1 = withVoting[1].approvalCriteria?.votingChallenges?.[0]?.voters?.[0]?.address;
+    for (const a of withVoting) {
+      const vcs = a.approvalCriteria?.votingChallenges ?? [];
+      if (vcs.length !== 1) {
+        errors.push(`Approval "${a.approvalId}": must have exactly 1 votingChallenge`);
+      } else {
+        const vc = vcs[0];
+        if (!vc.voters || vc.voters.length !== 1 || !vc.voters[0]?.address) {
+          errors.push(`Approval "${a.approvalId}": votingChallenge must have exactly 1 voter`);
+        }
+        if (vc.quorumThreshold == null || BigInt(vc.quorumThreshold) <= 0n) {
+          errors.push(`Approval "${a.approvalId}": votingChallenge quorumThreshold must be positive`);
+        }
+        if (!vc.proposalId || typeof vc.proposalId !== 'string') {
+          errors.push(`Approval "${a.approvalId}": votingChallenge must specify a non-empty proposalId`);
+        }
+      }
+    }
+
+    const vc0 = withVoting[0].approvalCriteria?.votingChallenges?.[0];
+    const vc1 = withVoting[1].approvalCriteria?.votingChallenges?.[0];
+    const v0 = vc0?.voters?.[0]?.address;
+    const v1 = vc1?.voters?.[0]?.address;
     if (v0 !== v1) errors.push('Accept and deny must have the same verifier address');
+
+    if (vc0?.proposalId && vc1?.proposalId && vc0.proposalId === vc1.proposalId) {
+      errors.push('Accept and deny must use distinct proposalIds');
+    }
 
     // Accept and deny must pay to different addresses (recipient vs submitter)
     const payout0 = withVoting[0].approvalCriteria?.coinTransfers?.[0]?.to;
@@ -90,6 +218,16 @@ export const validateBountyCollection = (collection: Readonly<iCollectionDoc<big
     const end1 = withVoting[1].transferTimes?.[0]?.end;
     if (end0 == null || end1 == null || BigInt(end0) !== BigInt(end1)) {
       errors.push('Accept and deny must have the same expiration time');
+    }
+
+    // One voting branch (deny) must pay the expire submitter address, and the other (accept) must pay a different recipient
+    if (withoutVoting.length === 1) {
+      const submitter = withoutVoting[0].approvalCriteria?.coinTransfers?.[0]?.to;
+      const denyMatches = withVoting.filter((a) => a.approvalCriteria?.coinTransfers?.[0]?.to === submitter);
+      const acceptMatches = withVoting.filter((a) => a.approvalCriteria?.coinTransfers?.[0]?.to !== submitter);
+      if (!submitter || denyMatches.length !== 1 || acceptMatches.length !== 1) {
+        errors.push('Deny approval must pay out to the same submitter address as the expire approval');
+      }
     }
   }
 
@@ -146,10 +284,29 @@ export interface BountyDetails {
  * Returns null on shape mismatch; caller should treat that as non-conformant.
  */
 export function extractBountyDetails(approvals: ReadonlyArray<iCollectionApproval<bigint>>): BountyDetails | null {
+  if (approvals.length !== 3) return null;
   const withVoting = approvals.filter((a) => (a.approvalCriteria?.votingChallenges?.length ?? 0) > 0);
   const withoutVoting = approvals.filter((a) => (a.approvalCriteria?.votingChallenges?.length ?? 0) === 0);
   if (withVoting.length !== 2 || withoutVoting.length !== 1) return null;
-  if (approvals.some((a) => a.approvalCriteria?.coinTransfers?.[0]?.overrideToWithInitiator)) return null;
+  if (
+    approvals.some(
+      (a) =>
+        a.approvalCriteria?.coinTransfers?.length !== 1 ||
+        a.approvalCriteria.coinTransfers[0].overrideToWithInitiator ||
+        !a.approvalCriteria.coinTransfers[0].to
+    )
+  ) {
+    return null;
+  }
+  if (
+    withVoting.some(
+      (a) =>
+        a.approvalCriteria?.votingChallenges?.length !== 1 ||
+        a.approvalCriteria.votingChallenges[0]?.voters?.length !== 1
+    )
+  ) {
+    return null;
+  }
 
   const expireApproval = withoutVoting[0];
   const submitterAddress = expireApproval.approvalCriteria?.coinTransfers?.[0]?.to ?? '';
@@ -160,6 +317,7 @@ export function extractBountyDetails(approvals: ReadonlyArray<iCollectionApprova
 
   const verifierAddress = acceptApproval.approvalCriteria?.votingChallenges?.[0]?.voters?.[0]?.address ?? '';
   const recipientAddress = acceptApproval.approvalCriteria?.coinTransfers?.[0]?.to ?? '';
+  if (!verifierAddress || !recipientAddress || !submitterAddress) return null;
   const depositCoins = (acceptApproval.approvalCriteria?.coinTransfers?.[0]?.coins ?? []).map((c: any) => ({
     denom: String(c.denom),
     amount: BigInt(c.amount)

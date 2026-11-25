@@ -20,7 +20,7 @@ import { spawnSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { deployCommand, executeKeyringMultiSteps, KeyringBindError } from './deploy.js';
+import { deployCommand, execKeyringCommand, executeKeyringMultiSteps, KeyringBindError } from './deploy.js';
 import { buildKeyringMultiCommand } from '../utils/keyring-command.js';
 
 describe('extractEntityFromEvents', () => {
@@ -496,6 +496,21 @@ describe('keyring multi-tx collection binding', () => {
       for (const f of built.msgFilePaths) {
         if (fs.existsSync(f)) fs.unlinkSync(f);
       }
+      if (built.tmpDir) fs.rmSync(built.tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('execKeyringCommand invokes the binary directly without shell evaluation', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-exec-test-'));
+    const marker = path.join(dir, 'should-not-exist');
+    try {
+      const literalArg = `$(touch ${marker}); echo extra`;
+      const res = execKeyringCommand(process.execPath, ['-e', 'process.stdout.write(JSON.stringify(process.argv.slice(1)))', literalArg]);
+      expect(res.status).toBe(0);
+      expect(JSON.parse(res.stdout)).toEqual([literalArg]);
+      expect(fs.existsSync(marker)).toBe(false);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 });

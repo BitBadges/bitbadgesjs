@@ -27,6 +27,85 @@ export interface PaymentRequestValidationResult {
  * NO mintEscrowCoinsToTransfer at the top level — that's the key
  * inversion vs. Bounty.
  */
+const MAX_UINT64_BI = 18446744073709551615n;
+
+function hasForeverRange(ranges: unknown): boolean {
+  if (!Array.isArray(ranges) || ranges.length === 0) return false;
+  return ranges.some((r: any) => {
+    if (!r || r.start == null || r.end == null) return false;
+    try {
+      return BigInt(r.start) === 1n && BigInt(r.end) === MAX_UINT64_BI;
+    } catch {
+      return false;
+    }
+  });
+}
+
+function isActionPermFrozen(entries: unknown): boolean {
+  if (!Array.isArray(entries) || entries.length === 0) return false;
+  return entries.some(
+    (e: any) =>
+      hasForeverRange(e?.permanentlyForbiddenTimes) &&
+      (!e?.permanentlyPermittedTimes || e.permanentlyPermittedTimes.length === 0)
+  );
+}
+
+function isTokenIdsPermFrozen(entries: unknown): boolean {
+  if (!Array.isArray(entries) || entries.length === 0) return false;
+  return entries.some(
+    (e: any) =>
+      hasForeverRange(e?.tokenIds) &&
+      hasForeverRange(e?.permanentlyForbiddenTimes) &&
+      (!e?.permanentlyPermittedTimes || e.permanentlyPermittedTimes.length === 0)
+  );
+}
+
+function isApprovalPermFrozen(entries: unknown): boolean {
+  if (!Array.isArray(entries) || entries.length === 0) return false;
+  return entries.some(
+    (e: any) =>
+      e?.fromListId === 'All' &&
+      e?.toListId === 'All' &&
+      e?.initiatedByListId === 'All' &&
+      e?.approvalId === 'All' &&
+      hasForeverRange(e?.transferTimes) &&
+      hasForeverRange(e?.tokenIds) &&
+      hasForeverRange(e?.ownershipTimes) &&
+      hasForeverRange(e?.permanentlyForbiddenTimes) &&
+      (!e?.permanentlyPermittedTimes || e.permanentlyPermittedTimes.length === 0)
+  );
+}
+
+function areCollectionPermissionsFrozen(perms: any): boolean {
+  if (!perms || typeof perms !== 'object') return false;
+  const actionFields = [
+    'canDeleteCollection',
+    'canArchiveCollection',
+    'canUpdateStandards',
+    'canUpdateCustomData',
+    'canUpdateManager',
+    'canUpdateCollectionMetadata',
+    'canAddMoreAliasPaths',
+    'canAddMoreCosmosCoinWrapperPaths'
+  ];
+  for (const field of actionFields) {
+    if (!isActionPermFrozen(perms[field])) return false;
+  }
+  if (!isTokenIdsPermFrozen(perms.canUpdateValidTokenIds)) return false;
+  if (!isTokenIdsPermFrozen(perms.canUpdateTokenMetadata)) return false;
+  if (!isApprovalPermFrozen(perms.canUpdateCollectionApprovals)) return false;
+  return true;
+}
+
+function isValidPayoutTarget(to: unknown, burnAddress: string): to is string {
+  if (typeof to !== 'string') return false;
+  const trimmed = to.trim();
+  if (trimmed.length === 0 || trimmed !== to) return false;
+  if (trimmed === burnAddress || trimmed === 'Mint' || trimmed === 'All' || trimmed === 'Total') return false;
+  if (trimmed.startsWith('!') || trimmed.includes(':') || trimmed.startsWith('bbvaloper')) return false;
+  return true;
+}
+
 export const validatePaymentRequestCollection = (collection: Readonly<iCollectionDoc<bigint>>): PaymentRequestValidationResult => {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -44,8 +123,13 @@ export const validatePaymentRequestCollection = (collection: Readonly<iCollectio
     errors.push('validTokenIds must be exactly [{start: 1, end: 1}]');
   }
 
+  // 2b. Collection permissions must be frozen so terms cannot be altered post-creation
+  if (!areCollectionPermissionsFrozen(collection.collectionPermissions)) {
+    errors.push('Collection permissions must be frozen');
+  }
+
   // Public requests are pay-only; a public denial has no authorized owner.
-  const approvals = collection.collectionApprovals;
+  const approvals = collection.collectionApprovals ?? [];
   const pay = approvals.find((a) => (a.approvalCriteria?.coinTransfers?.length ?? 0) > 0);
   const isPublic = pay?.initiatedByListId === 'All';
   const expectedCount = isPublic ? 1 : 2;
@@ -69,11 +153,27 @@ export const validatePaymentRequestCollection = (collection: Readonly<iCollectio
     if (a.toListId !== BURN_ADDRESS) errors.push(`Approval "${a.approvalId}": toListId must be burn address`);
   }
 
-  // 5. Both: maxNumTransfers.overallMaxNumTransfers = 1
+  // 5. Both: maxNumTransfers.overallMaxNumTransfers = 1 with no periodic reset
   for (const a of approvals) {
     const mnt = a.approvalCriteria?.maxNumTransfers;
     if (!mnt || BigInt(mnt.overallMaxNumTransfers) !== 1n) {
       errors.push(`Approval "${a.approvalId}": overallMaxNumTransfers must be 1`);
+    } else if (BigInt(mnt.resetTimeIntervals?.intervalLength ?? 0) !== 0n) {
+      errors.push(`Approval "${a.approvalId}": maxNumTransfers must not reset periodically`);
+    }
+  }
+
+  // 5b. Mutual exclusion / single terminal state across pay and deny branches
+  if (approvals.length > 1) {
+    const hasMaxSupplyOne =
+      collection.invariants?.maxSupplyPerId != null && BigInt(collection.invariants.maxSupplyPerId) === 1n;
+    const trackerIds = approvals.map((a) => a.approvalCriteria?.maxNumTransfers?.amountTrackerId ?? '');
+    const hasSharedTracker =
+      trackerIds.every((id) => typeof id === 'string' && id.length > 0) && new Set(trackerIds).size === 1;
+    if (!hasMaxSupplyOne && !hasSharedTracker) {
+      errors.push(
+        'Payment request approvals must enforce terminal-state mutual exclusion via invariants.maxSupplyPerId=1 or a shared amountTrackerId'
+      );
     }
   }
 
@@ -103,7 +203,9 @@ export const validatePaymentRequestCollection = (collection: Readonly<iCollectio
     if (ct.overrideToWithInitiator) {
       errors.push('Pay approval must have overrideToWithInitiator=false (credit the declared recipient)');
     }
-    if (!ct.to) errors.push('Pay approval coinTransfer must specify recipient address');
+    if (!isValidPayoutTarget(ct.to, BURN_ADDRESS)) {
+      errors.push('Pay approval coinTransfer must specify recipient address');
+    }
     // Payer (the initiator scoped via initiatedByListId) MUST NOT be the
     // recipient — a PaymentRequest is a payment FROM payer TO recipient,
     // and a self-payment is a no-op that bypasses the entire intent of

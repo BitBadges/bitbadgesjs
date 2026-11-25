@@ -48,14 +48,71 @@ export const getReviewUrlTool = {
   }
 };
 
+const ALLOWED_FRONTEND_ORIGINS = new Set([
+  'https://bitbadges.io',
+  'https://testnet.bitbadges.io',
+  'https://stagenet.bitbadges.io'
+]);
+
+function isLoopbackHttpUrl(parsed: URL): boolean {
+  return parsed.protocol === 'http:' && (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1');
+}
+
+function normalizeAndValidateFrontendBase(rawUrl: string, allowAnyHttpsOrigin: boolean): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new Error(`Invalid frontendUrl "${rawUrl}": expected a valid https:// or http://localhost URL.`);
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error(`Invalid frontendUrl "${rawUrl}": embedded credentials are not allowed.`);
+  }
+  if (parsed.search || parsed.hash) {
+    throw new Error(`Invalid frontendUrl "${rawUrl}": query parameters and fragments are not allowed.`);
+  }
+  const isHttps = parsed.protocol === 'https:';
+  const isLoopbackHttp = isLoopbackHttpUrl(parsed);
+  if (!isHttps && !isLoopbackHttp) {
+    throw new Error(`Invalid frontendUrl "${rawUrl}": only https:// or http://localhost / http://127.0.0.1 URLs are allowed.`);
+  }
+  if (!allowAnyHttpsOrigin && !isLoopbackHttp && !ALLOWED_FRONTEND_ORIGINS.has(parsed.origin)) {
+    const envUrl = process.env.BITBADGES_FRONTEND_URL;
+    let matchesEnvOrigin = false;
+    if (envUrl) {
+      try {
+        matchesEnvOrigin = new URL(envUrl).origin === parsed.origin;
+      } catch {
+        matchesEnvOrigin = false;
+      }
+    }
+    if (!matchesEnvOrigin) {
+      throw new Error(
+        `Untrusted frontendUrl origin "${parsed.origin}". Allowed origins: ${[...ALLOWED_FRONTEND_ORIGINS].join(', ')}, http://localhost, http://127.0.0.1, or an origin explicitly configured via BITBADGES_FRONTEND_URL.`
+      );
+    }
+  }
+  let end = parsed.pathname.length;
+  while (end > 0 && parsed.pathname[end - 1] === '/') end--;
+  const trimmedPath = end === 0 ? '' : parsed.pathname.slice(0, end);
+  return `${parsed.origin}${trimmedPath}`;
+}
+
 /** BITBADGES_FRONTEND_URL, else infer testnet from the API URL, else mainnet. */
 export function resolveFrontendBase(explicit?: string): string {
-  if (explicit) return explicit;
-  if (process.env.BITBADGES_FRONTEND_URL) return process.env.BITBADGES_FRONTEND_URL;
+  if (explicit) return normalizeAndValidateFrontendBase(explicit, false);
+  if (process.env.BITBADGES_FRONTEND_URL) return normalizeAndValidateFrontendBase(process.env.BITBADGES_FRONTEND_URL, true);
   return getApiUrl().includes('/testnet') ? 'https://testnet.bitbadges.io' : 'https://bitbadges.io';
 }
 
 export async function handleGetReviewUrl(input: GetReviewUrlInput): Promise<GetReviewUrlResult> {
+  let frontendBase: string;
+  try {
+    frontendBase = resolveFrontendBase(input.frontendUrl);
+  } catch (err: any) {
+    return { success: false, error: err?.message || String(err) };
+  }
+
   const raw = input.transaction ?? getTransactionFromSession(input.sessionId, input.creatorAddress);
   const transaction = normalizeTxMessages(ensureStringNumbers(raw));
   const messages = Array.isArray(transaction?.messages) ? transaction.messages : [];
@@ -93,7 +150,6 @@ export async function handleGetReviewUrl(input: GetReviewUrlInput): Promise<GetR
     return { success: false, error: `Preview upload failed: HTTP ${res.status} ${text}`.trim() };
   }
   const data = (await res.json()) as { code: string; expiresAt?: number; expiresIn?: string };
-  const frontendBase = resolveFrontendBase(input.frontendUrl);
   return {
     success: true,
     code: data.code,

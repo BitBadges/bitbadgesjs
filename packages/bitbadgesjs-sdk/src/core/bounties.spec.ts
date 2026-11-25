@@ -17,6 +17,9 @@ import {
   buildBountyDenyTx,
   buildBountyRefundMsg
 } from './bounties.js';
+import { frozenPermissions } from './builders/shared.js';
+import { buildBounty } from './builders/bounty.js';
+import { verifyStandardsCompliance } from '../api-indexer/verify-standards.js';
 
 const BURN = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 const VERIFIER = 'bb1verifier';
@@ -33,15 +36,16 @@ const makeAcceptApproval = () => ({
   approvalCriteria: {
     overridesFromOutgoingApprovals: true,
     overridesToIncomingApprovals: true,
-    maxNumTransfers: { overallMaxNumTransfers: 1n },
+    maxNumTransfers: { overallMaxNumTransfers: 1n, amountTrackerId: 'bounty-shared-tracker' },
     coinTransfers: [
       {
         to: 'bb1recipient',
         overrideFromWithApproverAddress: true,
+        overrideToWithInitiator: false,
         coins: [{ denom: 'ubadge', amount: 100n }]
       }
     ],
-    votingChallenges: [{ voters: [{ address: VERIFIER }] }]
+    votingChallenges: [{ proposalId: 'accept-proposal', quorumThreshold: 100n, voters: [{ address: VERIFIER, weight: 1n }] }]
   }
 });
 
@@ -55,15 +59,16 @@ const makeDenyApproval = () => ({
   approvalCriteria: {
     overridesFromOutgoingApprovals: true,
     overridesToIncomingApprovals: true,
-    maxNumTransfers: { overallMaxNumTransfers: 1n },
+    maxNumTransfers: { overallMaxNumTransfers: 1n, amountTrackerId: 'bounty-shared-tracker' },
     coinTransfers: [
       {
         to: 'bb1submitter',
         overrideFromWithApproverAddress: true,
+        overrideToWithInitiator: false,
         coins: [{ denom: 'ubadge', amount: 100n }]
       }
     ],
-    votingChallenges: [{ voters: [{ address: VERIFIER }] }]
+    votingChallenges: [{ proposalId: 'deny-proposal', quorumThreshold: 100n, voters: [{ address: VERIFIER, weight: 1n }] }]
   }
 });
 
@@ -77,11 +82,12 @@ const makeExpireApproval = () => ({
   approvalCriteria: {
     overridesFromOutgoingApprovals: true,
     overridesToIncomingApprovals: true,
-    maxNumTransfers: { overallMaxNumTransfers: 1n },
+    maxNumTransfers: { overallMaxNumTransfers: 1n, amountTrackerId: 'bounty-shared-tracker' },
     coinTransfers: [
       {
         to: 'bb1submitter',
         overrideFromWithApproverAddress: true,
+        overrideToWithInitiator: false,
         coins: [{ denom: 'ubadge', amount: 100n }]
       }
     ]
@@ -93,7 +99,8 @@ const makeValidCollection = (): any => ({
   standards: ['Bounty'],
   validTokenIds: [{ start: 1n, end: 1n }],
   collectionApprovals: [makeAcceptApproval(), makeDenyApproval(), makeExpireApproval()],
-  collectionPermissions: {}
+  collectionPermissions: frozenPermissions(),
+  invariants: { maxSupplyPerId: 1n }
 });
 
 const clone = (obj: any) =>
@@ -447,5 +454,97 @@ describe('buildBountyAcceptTx / DenyTx / RefundMsg', () => {
     const details = extractBountyDetails(c.collectionApprovals)!;
     const tx = buildBountyAcceptTx(VERIFIER, '7', details.acceptApproval);
     expect(() => JSON.stringify(tx)).not.toThrow();
+  });
+});
+
+describe('validateBountyCollection — terminal-state, permissions, and voting integrity', () => {
+  it('rejects unfrozen collection permissions', () => {
+    const c = clone(makeValidCollection());
+    c.collectionPermissions = {};
+    expect(validateBountyCollection(c).errors).toContain('Collection permissions must be frozen');
+  });
+
+  it('requires maxSupplyPerId=1 or a shared amountTrackerId across branches', () => {
+    const c = clone(makeValidCollection());
+    c.invariants = { maxSupplyPerId: 0n };
+    c.collectionApprovals[0].approvalCriteria.maxNumTransfers.amountTrackerId = 't1';
+    c.collectionApprovals[1].approvalCriteria.maxNumTransfers.amountTrackerId = 't2';
+    c.collectionApprovals[2].approvalCriteria.maxNumTransfers.amountTrackerId = 't3';
+    expect(validateBountyCollection(c).valid).toBe(false);
+
+    // Passing maxSupplyPerId=1 satisfies mutual exclusion even with distinct trackers
+    c.invariants = { maxSupplyPerId: 1n };
+    expect(validateBountyCollection(c).valid).toBe(true);
+
+    // Sharing a single non-empty amountTrackerId also satisfies mutual exclusion
+    c.invariants = { maxSupplyPerId: 0n };
+    for (const a of c.collectionApprovals) {
+      a.approvalCriteria.maxNumTransfers.amountTrackerId = 'shared-bounty';
+    }
+    expect(validateBountyCollection(c).valid).toBe(true);
+  });
+
+  it('rejects periodic resets on maxNumTransfers', () => {
+    const c = clone(makeValidCollection());
+    c.collectionApprovals[0].approvalCriteria.maxNumTransfers.resetTimeIntervals = { startTime: 1n, intervalLength: 1000n };
+    expect(validateBountyCollection(c).valid).toBe(false);
+  });
+
+  it('rejects extra voters, extra votingChallenges, zero quorum, or duplicate proposalIds', () => {
+    const extraVoter = clone(makeValidCollection());
+    extraVoter.collectionApprovals[0].approvalCriteria.votingChallenges[0].voters.push({ address: 'bb1extra', weight: 1n });
+    expect(validateBountyCollection(extraVoter).valid).toBe(false);
+    expect(extractBountyDetails(extraVoter.collectionApprovals)).toBeNull();
+
+    const extraChallenge = clone(makeValidCollection());
+    extraChallenge.collectionApprovals[0].approvalCriteria.votingChallenges.push({
+      proposalId: 'p-extra',
+      quorumThreshold: 100n,
+      voters: [{ address: VERIFIER, weight: 1n }]
+    });
+    expect(validateBountyCollection(extraChallenge).valid).toBe(false);
+
+    const zeroQuorum = clone(makeValidCollection());
+    zeroQuorum.collectionApprovals[0].approvalCriteria.votingChallenges[0].quorumThreshold = 0n;
+    expect(validateBountyCollection(zeroQuorum).valid).toBe(false);
+
+    const sameProposal = clone(makeValidCollection());
+    sameProposal.collectionApprovals[1].approvalCriteria.votingChallenges[0].proposalId = 'accept-proposal';
+    expect(validateBountyCollection(sameProposal).valid).toBe(false);
+  });
+
+  it('rejects empty/invalid payout addresses and deny/expire submitter mismatch', () => {
+    const emptyTo = clone(makeValidCollection());
+    emptyTo.collectionApprovals[0].approvalCriteria.coinTransfers[0].to = '';
+    expect(validateBountyCollection(emptyTo).valid).toBe(false);
+
+    const mismatch = clone(makeValidCollection());
+    mismatch.collectionApprovals[2].approvalCriteria.coinTransfers[0].to = 'bb1othersubmitter';
+    expect(validateBountyCollection(mismatch).valid).toBe(false);
+    expect(extractBountyDetails(mismatch.collectionApprovals)).toBeNull();
+  });
+
+  it('buildBounty sets maxSupplyPerId=1, shared tracker, and verifyStandardsCompliance delegates to validateBountyCollection', () => {
+    const built = buildBounty({
+      amount: 100,
+      denom: 'USDC',
+      verifier: 'bb1verifier',
+      recipient: 'bb1recipient',
+      submitter: 'bb1submitter',
+      uri: 'https://example.com/bounty.json'
+    });
+    expect(built.value.invariants.maxSupplyPerId).toBe('1');
+    const trackerIds = built.value.collectionApprovals.map((a: any) => a.approvalCriteria.maxNumTransfers.amountTrackerId);
+    expect(new Set(trackerIds).size).toBe(1);
+    expect(verifyStandardsCompliance(built).valid).toBe(true);
+
+    // Mutating a bounty to omit maxNumTransfers or unlock permissions fails verifyStandardsCompliance
+    const broken = structuredClone(built);
+    delete broken.value.collectionApprovals[0].approvalCriteria.maxNumTransfers;
+    expect(verifyStandardsCompliance(broken).valid).toBe(false);
+
+    const unlocked = structuredClone(built);
+    unlocked.value.collectionPermissions.canUpdateCollectionApprovals = [];
+    expect(verifyStandardsCompliance(unlocked).valid).toBe(false);
   });
 });

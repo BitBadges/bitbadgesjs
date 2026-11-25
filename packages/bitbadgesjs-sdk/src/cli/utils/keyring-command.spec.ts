@@ -6,7 +6,8 @@ import {
   buildKeyringMultiCommand,
   KEYRING_SUPPORTED_TYPE_URLS,
   KEYRING_POSITIONAL_TYPE_URLS,
-  parseKeyringBroadcastStdout
+  parseKeyringBroadcastStdout,
+  shellQuote
 } from './keyring-command.js';
 
 function tmpPath(): string {
@@ -448,5 +449,118 @@ describe('parseKeyringBroadcastStdout', () => {
       { txHash: 'AA11', checkTxCode: 0, rawLog: '' },
       { txHash: 'BB22', checkTxCode: 13, rawLog: 'insufficient fee' }
     ]);
+  });
+});
+
+describe('keyring command quoting, argv, and private temp files', () => {
+  const sampleMsg = {
+    typeUrl: '/tokenization.MsgCreateCollection',
+    value: { creator: 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv' }
+  };
+
+  it('shell-quotes all interpolated tokens in commandLine while preserving raw argv', () => {
+    const result = buildKeyringCommand({
+      msg: sampleMsg,
+      from: "alice; touch /tmp/test'd",
+      network: 'local',
+      binary: '/opt/my chain/bitbadgeschaind',
+      keyringBackend: 'file $(id)',
+      gas: 'auto`uname`',
+      gasAdjustment: '1.3|cat',
+      chainId: 'chain id;ls',
+      nodeUrl: 'http://localhost:26657/$(whoami)'
+    });
+    try {
+      expect(result.binary).toBe('/opt/my chain/bitbadgeschaind');
+      expect(result.args).toContain("alice; touch /tmp/test'd");
+      expect(result.args).toContain('file $(id)');
+      expect(result.args).toContain('chain id;ls');
+      expect(result.args).toContain('http://localhost:26657/$(whoami)');
+
+      expect(result.commandLine).toContain("'/opt/my chain/bitbadgeschaind'");
+      expect(result.commandLine).toContain(`--from ${shellQuote("alice; touch /tmp/test'd")}`);
+      expect(result.commandLine).toContain("--chain-id 'chain id;ls'");
+      expect(result.commandLine).toContain("--node 'http://localhost:26657/$(whoami)'");
+      expect(result.commandLine).toContain("--keyring-backend 'file $(id)'");
+      expect(result.commandLine).toContain("--gas 'auto`uname`' --gas-adjustment '1.3|cat'");
+    } finally {
+      if (result.tmpDir) fs.rmSync(result.tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('creates a 0700 temp directory and 0600 msg files using exclusive creation', () => {
+    const result = buildKeyringCommand({
+      msg: sampleMsg,
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    try {
+      expect(result.tmpDir).toBeDefined();
+      expect(path.dirname(result.msgFilePath)).toBe(result.tmpDir);
+      expect(fs.statSync(result.tmpDir!).mode & 0o777).toBe(0o700);
+      expect(fs.statSync(result.msgFilePath).mode & 0o777).toBe(0o600);
+    } finally {
+      if (result.tmpDir) fs.rmSync(result.tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to overwrite an existing msgFilePath', () => {
+    const out = tmpPath();
+    fs.writeFileSync(out, 'existing');
+    try {
+      expect(() =>
+        buildKeyringCommand({
+          msg: sampleMsg,
+          from: 'alice',
+          network: 'local',
+          binary: 'bitbadgeschaind',
+          keyringBackend: 'test',
+          gas: 'auto',
+          gasAdjustment: '1.3',
+          msgFilePath: out
+        })
+      ).toThrow(/EEXIST/);
+    } finally {
+      fs.unlinkSync(out);
+    }
+  });
+
+  it('provides raw unquoted args per step for multi-msg commands and quotes special chars in commandLine', () => {
+    const result = buildKeyringMultiCommand({
+      messages: [
+        {
+          typeUrl: '/tokenization.MsgCastVote',
+          value: {
+            collection_id: '7',
+            approval_level: 'collection',
+            approver_address: '',
+            approval_id: 'id with spaces; $(echo nope)',
+            proposal_id: 'prop-1',
+            yes_weight: '100'
+          }
+        },
+        sampleMsg
+      ],
+      from: 'alice; id',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    try {
+      expect(result.tmpDir).toBeDefined();
+      expect(fs.statSync(result.tmpDir!).mode & 0o777).toBe(0o700);
+      expect(result.steps[0].args).toContain('id with spaces; $(echo nope)');
+      expect(result.steps[0].args).toContain('alice; id');
+      expect(result.steps[0].commandLine).toContain("'id with spaces; $(echo nope)'");
+      expect(result.steps[0].commandLine).toContain("--from 'alice; id'");
+    } finally {
+      if (result.tmpDir) fs.rmSync(result.tmpDir, { recursive: true, force: true });
+    }
   });
 });

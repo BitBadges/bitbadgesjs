@@ -12,6 +12,8 @@
  */
 
 import { CollectionDoc } from './docs-types/docs.js';
+import { validateBountyCollection } from '../core/bounties.js';
+import { validatePaymentRequestCollection } from '../core/payment-requests.js';
 import { doesCollectionFollowSubscriptionProtocol } from '../core/subscriptions.js';
 import { validatePaymentRequestV2Collection } from '../core/payment-requests-v2.js';
 import { inspectSpendableCredit } from '../core/spendable-credits.js';
@@ -758,63 +760,11 @@ function verifyCommonMintRules(value: any): StandardViolation[] {
 // ============================================================
 
 function verifyPaymentRequest(value: any): StandardViolation[] {
-  const violations: StandardViolation[] = [];
-  const std = 'PaymentRequest';
-  const approvals = getApprovals(value);
-
-  if (!isSingleToken(value.validTokenIds)) {
-    violations.push({ standard: std, field: 'validTokenIds', message: 'PaymentRequest collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
-  }
-
-  const pay = approvals.find((a: any) => a.approvalCriteria?.coinTransfers?.length > 0);
-  const isPublic = pay?.initiatedByListId === 'All';
-  if (approvals.length !== (isPublic ? 1 : 2)) {
-    violations.push({ standard: std, field: 'collectionApprovals', message: isPublic
-      ? 'Public PaymentRequest requires exactly 1 approval (pay only; no deny).'
-      : `PaymentRequest requires exactly 2 approvals (pay, deny). Found ${approvals.length}.` });
-  }
-
-  const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
-  for (const a of mintApprovals) {
-    const ac = a.approvalCriteria || {};
-    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
-      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `PaymentRequest approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
-    }
-    if (ac.overridesToIncomingApprovals !== true && ac.overridesToIncomingApprovals !== 'true') {
-      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesToIncomingApprovals`, message: `PaymentRequest approval "${a.approvalId}" MUST have overridesToIncomingApprovals: true.` });
-    }
-    const mnt = ac.maxNumTransfers;
-    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
-      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `PaymentRequest approval "${a.approvalId}" overallMaxNumTransfers must be "1".` });
-    }
-    // Inverse-of-Bounty invariant: PaymentRequest must never use voting.
-    // Approval gating happens via initiatedByListId scoped to the payer.
-    if (ac.votingChallenges && ac.votingChallenges.length > 0) {
-      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].votingChallenges`, message: `PaymentRequest approval "${a.approvalId}" MUST NOT use votingChallenges — gating happens via initiatedByListId.` });
-    }
-  }
-
-  // Exactly one approval may carry a coinTransfer (the pay approval).
-  // It must NOT use overrideFromWithApproverAddress — the chain default
-  // routes "from" to the initiator (the payer), which is the whole
-  // point of the no-escrow inversion.
-  const withCoinTransfer = mintApprovals.filter((a: any) => a.approvalCriteria?.coinTransfers?.length > 0);
-  if (withCoinTransfer.length !== 1) {
-    violations.push({ standard: std, field: 'collectionApprovals.coinTransfers', message: `PaymentRequest must have exactly 1 approval with a coinTransfer (pay). Found ${withCoinTransfer.length}.` });
-  } else {
-    const payApproval = withCoinTransfer[0];
-    const ct = payApproval.approvalCriteria.coinTransfers[0];
-    if (ct.overrideFromWithApproverAddress === true || ct.overrideFromWithApproverAddress === 'true') {
-      violations.push({ standard: std, field: 'collectionApprovals.coinTransfers[0].overrideFromWithApproverAddress', message: 'PaymentRequest pay approval MUST have overrideFromWithApproverAddress=false (debit initiator/payer, not escrow).' });
-    }
-    // Payer (initiator) must not equal the recipient — self-payment is
-    // a no-op that bypasses the intent of the standard.
-    if (ct.to && payApproval.initiatedByListId && ct.to === payApproval.initiatedByListId) {
-      violations.push({ standard: std, field: 'collectionApprovals.coinTransfers[0].to', message: 'PaymentRequest pay recipient MUST NOT equal the payer (initiatedByListId).' });
-    }
-  }
-
-  return violations;
+  return validatePaymentRequestCollection(value).errors.map((message) => ({
+    standard: 'PaymentRequest',
+    field: 'paymentRequest',
+    message
+  }));
 }
 
 // ============================================================
@@ -822,42 +772,11 @@ function verifyPaymentRequest(value: any): StandardViolation[] {
 // ============================================================
 
 function verifyBounty(value: any): StandardViolation[] {
-  const violations: StandardViolation[] = [];
-  const std = 'Bounty';
-  const approvals = getApprovals(value);
-
-  if (!isSingleToken(value.validTokenIds)) {
-    violations.push({ standard: std, field: 'validTokenIds', message: 'Bounty collections MUST have validTokenIds = [{ start: "1", end: "1" }].' });
-  }
-
-  // Must have 3 approvals: accept, deny, expire
-  if (approvals.length < 3) {
-    violations.push({ standard: std, field: 'collectionApprovals', message: `Bounty requires at least 3 approvals (accept, deny, expire). Found ${approvals.length}.` });
-  }
-
-  const mintApprovals = approvals.filter((a: any) => a.fromListId === 'Mint');
-  for (const a of mintApprovals) {
-    const ac = a.approvalCriteria || {};
-    if (ac.overridesFromOutgoingApprovals !== true && ac.overridesFromOutgoingApprovals !== 'true') {
-      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesFromOutgoingApprovals`, message: `Bounty approval "${a.approvalId}" MUST have overridesFromOutgoingApprovals: true.` });
-    }
-    if (ac.overridesToIncomingApprovals !== true && ac.overridesToIncomingApprovals !== 'true') {
-      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].overridesToIncomingApprovals`, message: `Bounty approval "${a.approvalId}" MUST have overridesToIncomingApprovals: true.` });
-    }
-    // Each should have maxNumTransfers.overallMaxNumTransfers = 1
-    const mnt = ac.maxNumTransfers;
-    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
-      violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Bounty approval "${a.approvalId}" overallMaxNumTransfers must be "1".` });
-    }
-  }
-
-  // Verify voting challenges exist on at least 2 approvals
-  const withVoting = mintApprovals.filter((a: any) => a.approvalCriteria?.votingChallenges?.length > 0);
-  if (withVoting.length < 2) {
-    violations.push({ standard: std, field: 'collectionApprovals.votingChallenges', message: 'Bounty requires at least 2 approvals with votingChallenges (accept + deny).' });
-  }
-
-  return violations;
+  return validateBountyCollection(value).errors.map((message) => ({
+    standard: 'Bounty',
+    field: 'bounty',
+    message
+  }));
 }
 
 // ============================================================
@@ -919,7 +838,7 @@ function verifyAuction(value: any): StandardViolation[] {
     }
     // Must have maxNumTransfers = 1
     const mnt = ac.maxNumTransfers;
-    if (mnt && mnt.overallMaxNumTransfers !== 1n) {
+    if (!mnt || BigInt(mnt.overallMaxNumTransfers ?? 0) !== 1n) {
       violations.push({ standard: std, field: `collectionApprovals[${a.approvalId}].maxNumTransfers`, message: `Auction mint-to-winner overallMaxNumTransfers must be "1".` });
     }
     // Transfer times should be bounded (not FOREVER)

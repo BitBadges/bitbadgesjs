@@ -1,3 +1,4 @@
+import { bech32 } from 'bech32';
 import { z } from 'zod';
 import { convertToBitBadgesAddress, isAddressValid } from '../address-converter/converter.js';
 import {
@@ -22,9 +23,24 @@ const coinAmount = z
   .string()
   .regex(/^[1-9][0-9]*$/, 'Expected a positive base-unit integer string')
   .refine((v) => BigInt(v) < COIN_AMOUNT_LIMIT, 'Coin amount exceeds supported range');
-const address = z
-  .string()
-  .refine((v) => isAddressValid(v) && convertToBitBadgesAddress(v) === v && v !== BURN_ADDRESS, 'Expected a canonical spendable BitBadges address');
+function isCanonicalSpendableBitBadgesAddress(v: string): boolean {
+  if (!v.startsWith('bb1') || v !== v.toLowerCase() || v === BURN_ADDRESS) {
+    return false;
+  }
+  if (!isAddressValid(v) || convertToBitBadgesAddress(v) !== v) {
+    return false;
+  }
+  try {
+    const { prefix, words } = bech32.decode(v);
+    if (prefix !== 'bb') return false;
+    const bytes = Buffer.from(bech32.fromWords(words));
+    return bytes.length === 20 && bech32.encode('bb', bech32.toWords(bytes)) === v;
+  } catch {
+    return false;
+  }
+}
+
+const address = z.string().refine(isCanonicalSpendableBitBadgesAddress, 'Expected a canonical spendable BitBadges address');
 
 export const paymentObligationSchema = z
   .object({

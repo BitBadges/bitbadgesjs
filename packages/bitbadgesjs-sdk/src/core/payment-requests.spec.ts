@@ -8,6 +8,9 @@ import {
   buildPaymentRequestPayMsg,
   buildPaymentRequestDenyMsg
 } from './payment-requests.js';
+import { frozenPermissions } from './builders/shared.js';
+import { buildPaymentRequest } from './builders/payment-request.js';
+import { verifyStandardsCompliance } from '../api-indexer/verify-standards.js';
 
 const BURN = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
 const PAYER = 'bb1payer';
@@ -23,7 +26,7 @@ const makePayApproval = () => ({
   approvalCriteria: {
     overridesFromOutgoingApprovals: true,
     overridesToIncomingApprovals: true,
-    maxNumTransfers: { overallMaxNumTransfers: 1n },
+    maxNumTransfers: { overallMaxNumTransfers: 1n, amountTrackerId: 'pr-shared-tracker' },
     coinTransfers: [
       {
         to: RECIPIENT,
@@ -45,7 +48,7 @@ const makeDenyApproval = () => ({
   approvalCriteria: {
     overridesFromOutgoingApprovals: true,
     overridesToIncomingApprovals: true,
-    maxNumTransfers: { overallMaxNumTransfers: 1n }
+    maxNumTransfers: { overallMaxNumTransfers: 1n, amountTrackerId: 'pr-shared-tracker' }
   }
 });
 
@@ -53,7 +56,8 @@ const makeValidCollection = (): any => ({
   standards: ['PaymentRequest'],
   validTokenIds: [{ start: 1n, end: 1n }],
   collectionApprovals: [makePayApproval(), makeDenyApproval()],
-  collectionPermissions: {}
+  collectionPermissions: frozenPermissions(),
+  invariants: { maxSupplyPerId: 1n }
 });
 
 // JSON-based clone loses bigints; build fresh fixtures and override
@@ -345,5 +349,70 @@ describe('payment request approval identity', () => {
     const selected = { ...(action === 'pay' ? makePayApproval() : makeDenyApproval()), version: 7n };
     const build = action === 'pay' ? buildPaymentRequestPayMsg : buildPaymentRequestDenyMsg;
     expect((build(PAYER, '42', selected as any).value as any).transfers[0].prioritizedApprovals[0].version).toBe('7');
+  });
+});
+
+describe('validatePaymentRequestCollection — terminal-state, permissions, and verifyStandardsCompliance parity', () => {
+  it('rejects unfrozen collection permissions', () => {
+    const c = fresh();
+    c.collectionPermissions = {};
+    expect(validatePaymentRequestCollection(c).errors).toContain('Collection permissions must be frozen');
+  });
+
+  it('requires maxSupplyPerId=1 or a shared amountTrackerId between pay and deny', () => {
+    const c = fresh();
+    c.invariants = { maxSupplyPerId: 0n };
+    c.collectionApprovals[0].approvalCriteria.maxNumTransfers.amountTrackerId = 'pay-only';
+    c.collectionApprovals[1].approvalCriteria.maxNumTransfers.amountTrackerId = 'deny-only';
+    expect(validatePaymentRequestCollection(c).valid).toBe(false);
+
+    c.invariants = { maxSupplyPerId: 1n };
+    expect(validatePaymentRequestCollection(c).valid).toBe(true);
+
+    c.invariants = { maxSupplyPerId: 0n };
+    c.collectionApprovals[0].approvalCriteria.maxNumTransfers.amountTrackerId = 'shared-pr';
+    c.collectionApprovals[1].approvalCriteria.maxNumTransfers.amountTrackerId = 'shared-pr';
+    expect(validatePaymentRequestCollection(c).valid).toBe(true);
+  });
+
+  it('rejects periodic resets on maxNumTransfers and invalid payout targets', () => {
+    const resetting = fresh();
+    resetting.collectionApprovals[0].approvalCriteria.maxNumTransfers.resetTimeIntervals = { startTime: 1n, intervalLength: 60000n };
+    expect(validatePaymentRequestCollection(resetting).valid).toBe(false);
+
+    const valoperRecipient = fresh();
+    valoperRecipient.collectionApprovals[0].approvalCriteria.coinTransfers[0].to = 'bbvaloper1fake';
+    expect(validatePaymentRequestCollection(valoperRecipient).valid).toBe(false);
+  });
+
+  it('buildPaymentRequest emits maxSupplyPerId=1 + shared tracker, and verifyStandardsCompliance rejects hidden coinTransfers or missing maxNumTransfers', () => {
+    const built = buildPaymentRequest({
+      amount: 10,
+      denom: 'USDC',
+      payer: PAYER,
+      recipient: RECIPIENT,
+      uri: 'https://example.com/pr.json'
+    });
+    expect(built.value.invariants.maxSupplyPerId).toBe('1');
+    const trackerIds = built.value.collectionApprovals.map((a: any) => a.approvalCriteria.maxNumTransfers.amountTrackerId);
+    expect(new Set(trackerIds).size).toBe(1);
+    expect(verifyStandardsCompliance(built).valid).toBe(true);
+
+    const missingMnt = structuredClone(built);
+    delete missingMnt.value.collectionApprovals[0].approvalCriteria.maxNumTransfers;
+    expect(verifyStandardsCompliance(missingMnt).valid).toBe(false);
+
+    const extraCoin = structuredClone(built);
+    extraCoin.value.collectionApprovals[0].approvalCriteria.coinTransfers.push({
+      to: 'bb1extra',
+      coins: [{ denom: 'ubadge', amount: '1' }],
+      overrideFromWithApproverAddress: false,
+      overrideToWithInitiator: false
+    });
+    expect(verifyStandardsCompliance(extraCoin).valid).toBe(false);
+
+    const redirected = structuredClone(built);
+    redirected.value.collectionApprovals[0].approvalCriteria.coinTransfers[0].overrideToWithInitiator = true;
+    expect(verifyStandardsCompliance(redirected).valid).toBe(false);
   });
 });

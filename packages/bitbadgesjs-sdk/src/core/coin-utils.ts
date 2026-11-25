@@ -50,27 +50,37 @@ export class CosmosCoinUtils {
   /** Display amount as a precise string. */
   getDisplayAmountString(precision?: number, roundingMode: RoundingMode = RoundingMode.ROUND_DOWN): string {
     const actualPrecision = precision ?? this.decimals;
+    if (!Number.isInteger(actualPrecision) || actualPrecision < 0) {
+      throw new Error(`Invalid precision: ${actualPrecision}`);
+    }
     if (this.decimals === 0) return this.amount.toString();
 
-    const divisor = BigInt(10 ** this.decimals);
-    const quotient = this.amount / divisor;
-    const remainder = this.amount % divisor;
+    const negative = this.amount < 0n;
+    const absAmount = negative ? -this.amount : this.amount;
+    const divisor = pow10(this.decimals);
+    const quotient = absAmount / divisor;
+    const remainder = absAmount % divisor;
 
-    if (remainder === 0n) return quotient.toString();
-
-    const remainderStr = remainder.toString().padStart(this.decimals, '0');
-    const decimalPart = remainderStr.slice(0, actualPrecision);
+    if (remainder === 0n) {
+      return (negative && quotient !== 0n ? '-' : '') + quotient.toString();
+    }
 
     if (actualPrecision < this.decimals) {
-      const nextDigit = parseInt(remainderStr[actualPrecision] || '0');
-      let roundedDecimal = decimalPart;
-      if (nextDigit >= 5 && roundingMode === RoundingMode.ROUND_UP) {
-        const decimalNum = parseInt(decimalPart) + 1;
-        roundedDecimal = decimalNum.toString().padStart(actualPrecision, '0');
+      const scaleDown = pow10(this.decimals - actualPrecision);
+      const roundedScaled = roundDivision(absAmount, scaleDown, roundingMode);
+      const sign = negative && roundedScaled !== 0n ? '-' : '';
+      if (actualPrecision === 0) {
+        return `${sign}${roundedScaled.toString()}`;
       }
-      return `${quotient}.${roundedDecimal}`;
+      const precDivisor = pow10(actualPrecision);
+      const roundedInt = roundedScaled / precDivisor;
+      const roundedFrac = (roundedScaled % precDivisor).toString().padStart(actualPrecision, '0');
+      return `${sign}${roundedInt}.${roundedFrac}`;
     }
-    return `${quotient}.${decimalPart}`;
+
+    const remainderStr = remainder.toString().padStart(this.decimals, '0');
+    const sign = negative ? '-' : '';
+    return `${sign}${quotient}.${remainderStr}`;
   }
 
   /** Display amount with optional symbol. Default 2 dp, symbol on. */
@@ -124,6 +134,9 @@ export class CosmosCoinUtils {
 
   divide(divisor: number, roundingMode: RoundingMode = RoundingMode.ROUND_DOWN): CosmosCoinUtils {
     const { factorBigInt, precisionMultiplier } = decomposeFactor(divisor);
+    if (factorBigInt === 0n) {
+      throw new Error('Division by zero');
+    }
     const numerator = this.amount * precisionMultiplier;
     return this.withAmount(roundDivision(numerator, factorBigInt, roundingMode));
   }
@@ -151,23 +164,21 @@ export class CosmosCoinUtils {
     roundingMode: RoundingMode = RoundingMode.ROUND_DOWN
   ): CosmosCoinUtils {
     const actualDecimals = decimals ?? (coinDetails ? Number(coinDetails.decimals) : 0);
-    const displayStr = displayAmount.toString();
-    const negative = displayStr.startsWith('-');
-    const unsigned = negative ? displayStr.slice(1) : displayStr;
-    const [integerPart, decimalPart = ''] = unsigned.split('.');
-
-    const paddedDecimal = decimalPart.padEnd(actualDecimals, '0').slice(0, actualDecimals);
-    const fullAmountStr = (integerPart || '0') + paddedDecimal;
-    let rawAmount = BigInt(fullAmountStr);
-
-    if (decimalPart.length > actualDecimals) {
-      const nextDigit = parseInt(decimalPart[actualDecimals] || '0');
-      if (nextDigit >= 5 && roundingMode === RoundingMode.ROUND_UP) {
-        rawAmount = rawAmount + 1n;
-      }
+    if (!Number.isInteger(actualDecimals) || actualDecimals < 0) {
+      throw new Error(`Invalid decimals: ${actualDecimals}`);
     }
 
-    return new CosmosCoinUtils({ denom, amount: negative ? -rawAmount : rawAmount, coinDetails });
+    const { negative, intPart, fracPart } = parseDecimalInput(displayAmount);
+    const allDigits = BigInt(intPart + fracPart);
+    let rawAbs: bigint;
+    if (fracPart.length <= actualDecimals) {
+      rawAbs = allDigits * pow10(actualDecimals - fracPart.length);
+    } else {
+      rawAbs = roundDivision(allDigits, pow10(fracPart.length - actualDecimals), roundingMode);
+    }
+
+    const rawAmount = negative && rawAbs !== 0n ? -rawAbs : rawAbs;
+    return new CosmosCoinUtils({ denom, amount: rawAmount, coinDetails });
   }
 
   static fromRawAmount(rawAmountString: string, denom: string, coinDetails?: CoinDetails): CosmosCoinUtils {
@@ -196,7 +207,7 @@ export class CosmosCoinUtils {
    */
   static calculateSlippage(expectedAmount: bigint, actualAmount: bigint, precision: number = 6): number {
     if (expectedAmount === 0n) return 0;
-    const PRECISION_MULTIPLIER = BigInt(10 ** precision);
+    const PRECISION_MULTIPLIER = pow10(precision);
     const diff = expectedAmount - actualAmount;
     return Number((diff * 100n * PRECISION_MULTIPLIER) / expectedAmount) / Number(PRECISION_MULTIPLIER);
   }
@@ -260,34 +271,106 @@ export function cosmosPercentToString(value: number, maxDecimals: number = 3): s
 
 // ───────────────────────── internal helpers ─────────────────────────
 
+function pow10(exponent: number): bigint {
+  if (!Number.isInteger(exponent) || exponent < 0) {
+    throw new Error(`Invalid base-10 exponent: ${exponent}`);
+  }
+  return 10n ** BigInt(exponent);
+}
+
+function parseDecimalInput(input: number | string): { negative: boolean; intPart: string; fracPart: string } {
+  let raw: string;
+  if (typeof input === 'number') {
+    if (!Number.isFinite(input)) {
+      throw new Error(`Invalid decimal amount: "${input}"`);
+    }
+    raw = input.toString();
+  } else {
+    raw = input.trim();
+  }
+
+  const match = /^([+-])?(?:(\d+)(?:\.(\d*))?|\.(\d+))(?:[eE]([+-]?\d+))?$/.exec(raw);
+  if (!match) {
+    throw new Error(`Invalid decimal amount: "${input}"`);
+  }
+
+  let negative = match[1] === '-';
+  const intDigits = match[2] ?? '';
+  const fracDigits = match[3] ?? match[4] ?? '';
+  const exponent = match[5] ? parseInt(match[5], 10) : 0;
+  if (!Number.isSafeInteger(exponent)) {
+    throw new Error(`Exponent out of range in decimal amount: "${input}"`);
+  }
+
+  const digits = intDigits + fracDigits;
+  const pointPos = intDigits.length + exponent;
+
+  let intPart: string;
+  let fracPart: string;
+  if (pointPos <= 0) {
+    intPart = '0';
+    fracPart = '0'.repeat(-pointPos) + digits;
+  } else if (pointPos >= digits.length) {
+    intPart = digits + '0'.repeat(pointPos - digits.length);
+    fracPart = '';
+  } else {
+    intPart = digits.slice(0, pointPos);
+    fracPart = digits.slice(pointPos);
+  }
+
+  intPart = intPart.replace(/^0+(?=\d)/, '') || '0';
+  if (intPart === '0' && /^0*$/.test(fracPart)) {
+    negative = false;
+  }
+
+  return { negative, intPart, fracPart };
+}
+
 function decomposeFactor(value: number): { factorBigInt: bigint; precisionMultiplier: bigint } {
-  const str = value.toString();
-  const decimalPlaces = str.includes('.') ? str.split('.')[1].length : 0;
+  const { negative, intPart, fracPart } = parseDecimalInput(value);
+  const absDigits = BigInt(intPart + fracPart);
   return {
-    factorBigInt: BigInt(str.replace('.', '')),
-    precisionMultiplier: BigInt(10 ** decimalPlaces)
+    factorBigInt: negative && absDigits !== 0n ? -absDigits : absDigits,
+    precisionMultiplier: pow10(fracPart.length)
   };
 }
 
 function roundDivision(numerator: bigint, denominator: bigint, roundingMode: RoundingMode): bigint {
-  const result = numerator / denominator;
-  const remainder = numerator % denominator;
-  if (remainder === 0n) return result;
+  if (denominator === 0n) {
+    throw new Error('Division by zero');
+  }
+  const negative = (numerator < 0n) !== (denominator < 0n);
+  const absNum = numerator < 0n ? -numerator : numerator;
+  const absDen = denominator < 0n ? -denominator : denominator;
 
+  const quotient = absNum / absDen;
+  const remainder = absNum % absDen;
+  if (remainder === 0n) {
+    return negative && quotient !== 0n ? -quotient : quotient;
+  }
+
+  let rounded = quotient;
   switch (roundingMode) {
     case RoundingMode.ROUND_UP:
-      return result + 1n;
+      rounded = quotient + 1n;
+      break;
     case RoundingMode.ROUND_HALF_UP:
-      return remainder * 2n >= denominator ? result + 1n : result;
+      if (remainder * 2n >= absDen) rounded = quotient + 1n;
+      break;
     case RoundingMode.ROUND_HALF_DOWN:
-      return remainder * 2n > denominator ? result + 1n : result;
+      if (remainder * 2n > absDen) rounded = quotient + 1n;
+      break;
     case RoundingMode.ROUND_HALF_EVEN:
-      if (remainder * 2n > denominator) return result + 1n;
-      if (remainder * 2n === denominator && result % 2n === 1n) return result + 1n;
-      return result;
+      if (remainder * 2n > absDen || (remainder * 2n === absDen && quotient % 2n === 1n)) {
+        rounded = quotient + 1n;
+      }
+      break;
     default:
-      return result; // ROUND_DOWN
+      rounded = quotient; // ROUND_DOWN
+      break;
   }
+
+  return negative && rounded !== 0n ? -rounded : rounded;
 }
 
 function roundNumber(value: number, precision: number, roundingMode: RoundingMode): number {

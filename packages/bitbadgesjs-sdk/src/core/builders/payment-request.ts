@@ -64,6 +64,8 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
   const baseAmount = toBaseUnits(params.amount, coin.decimals);
   const expirationTs = durationToTimestamp(params.expiration || '30d');
 
+  const sharedTrackerId = 'payment-request-settlement-tracker';
+
   const collectionApprovals = [
     // Pay — payer approves, coin transfer fires from payer's wallet.
     // overrideFromWithApproverAddress: false → chain defaults the
@@ -85,7 +87,7 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
       approvalCriteria: {
         predeterminedBalances: mintToBurnBalances(),
         maxNumTransfers: {
-          ...zeroMaxTransfers('payment-request-pay-tracker'),
+          ...zeroMaxTransfers(sharedTrackerId),
           overallMaxNumTransfers: '1'
         },
         coinTransfers: [
@@ -115,7 +117,7 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
       approvalCriteria: {
         predeterminedBalances: mintToBurnBalances(),
         maxNumTransfers: {
-          ...zeroMaxTransfers('payment-request-deny-tracker'),
+          ...zeroMaxTransfers(sharedTrackerId),
           overallMaxNumTransfers: '1'
         },
         overridesFromOutgoingApprovals: true,
@@ -156,7 +158,7 @@ export function buildPaymentRequest(params: PaymentRequestParams): any {
     defaultBalances: defaultBalances(),
     invariants: {
       noCustomOwnershipTimes: true,
-      maxSupplyPerId: '0',
+      maxSupplyPerId: '1',
       noForcefulPostMintTransfers: true,
       disablePoolCreation: true
     },
