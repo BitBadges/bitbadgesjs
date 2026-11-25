@@ -171,7 +171,7 @@ export async function handleBuildTransfer(input: BuildTransferInput): Promise<Bu
     }
 
     const collection = response.data.collections[0] as Record<string, unknown>;
-    const validBadgeIds = (collection.validBadgeIds as Array<{ start: string; end: string }>) || [{ start: '1', end: '1' }];
+    const validBadgeIds = ((collection.validTokenIds ?? collection.validBadgeIds) as Array<{ start: string; end: string }>) || [{ start: '1', end: '1' }];
     const rawApprovals = (collection.collectionApprovals as Array<Record<string, unknown>>) || [];
     const invariants = (collection.invariants as Record<string, unknown>) || {};
     const ibcPath = invariants.cosmosCoinBackedPath as Record<string, unknown> | null | undefined;
