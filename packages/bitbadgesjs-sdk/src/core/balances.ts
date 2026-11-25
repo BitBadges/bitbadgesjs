@@ -358,7 +358,8 @@ export function addBalance<T extends NumberType>(existingBalances: iBalance<T>[]
   let existing = BalanceArray.From(existingBalances).clone();
   existing = deleteBalances(balanceToAdd.tokenIds, balanceToAdd.ownershipTimes, existing);
   for (const balance of currBalances) {
-    balance.amount = safeAdd(balance.amount, balanceToAdd.amount);
+    const allowExistingNegative = BigInt(balance.amount) < 0n && BigInt(balanceToAdd.amount) >= 0n;
+    balance.amount = safeAdd(balance.amount, balanceToAdd.amount, allowExistingNegative);
   }
 
   existing = setBalances(currBalances, existing);

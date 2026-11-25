@@ -278,4 +278,22 @@ describe('BalancesWithTimesFuzz', () => {
     );
     expect(afterZeroAdd).toHaveLength(0);
   });
+
+  it('allows addBalances to reconcile negative slots created by subtractBalances(..., true)', () => {
+    const slot = { amount: 1n, tokenIds: [{ start: 42n, end: 42n }], ownershipTimes: [{ start: 100n, end: 100n }] };
+    const balances = BalanceArray.From<bigint>([]);
+    balances.subtractBalances(BalanceArray.From([slot]), true);
+    expect(balances[0].amount).toBe(-1n);
+
+    balances.addBalances(BalanceArray.From([slot]));
+    expect(balances).toHaveLength(0);
+
+    expect(() => safeAdd(-1n, 1n)).toThrow(/Negative inputs/);
+    expect(() =>
+      addBalances<bigint>(
+        [{ amount: -1n, tokenIds: [{ start: 42n, end: 42n }], ownershipTimes: [{ start: 100n, end: 100n }] }],
+        []
+      )
+    ).toThrow(/Negative inputs/);
+  });
 });
