@@ -112,6 +112,78 @@ describe('MsgCreateCollection — no spurious errors for missing update flags', 
   });
 });
 
+describe('invariants.cosmosCoinBackedPath validation', () => {
+  const zeroBackedPath = {
+    conversion: {
+      sideA: { amount: '0', denom: '' },
+      sideB: []
+    }
+  };
+
+  it.each([
+    ['MsgCreateCollection', CREATE, MIN_COLLECTION_VALUE()],
+    ['MsgUpdateCollection', UPDATE, { ...MIN_COLLECTION_VALUE(), collectionId: '42' }],
+    ['MsgUniversalUpdateCollection', UNIVERSAL, { ...MIN_COLLECTION_VALUE(), collectionId: '0' }]
+  ])('%s rejects zero-valued cosmosCoinBackedPath with empty denom', (_name, typeUrl, baseVal) => {
+    const result = validateTransaction(
+      wrap(typeUrl, {
+        ...baseVal,
+        invariants: {
+          noCustomOwnershipTimes: true,
+          maxSupplyPerId: '0',
+          cosmosCoinBackedPath: zeroBackedPath
+        }
+      })
+    );
+    expect(result.valid).toBe(false);
+    expect(
+      result.issues.some(
+        (i) =>
+          i.severity === 'error' &&
+          i.path === 'messages[0].value.invariants.cosmosCoinBackedPath.conversion.sideA.denom' &&
+          /conversion\.sideA\.denom/.test(i.message)
+      )
+    ).toBe(true);
+  });
+
+  it('passes when cosmosCoinBackedPath is omitted or null', () => {
+    const omitted = validateTransaction(
+      wrap(CREATE, {
+        ...MIN_COLLECTION_VALUE(),
+        invariants: { noCustomOwnershipTimes: true, maxSupplyPerId: '0' }
+      })
+    );
+    expect(omitted.valid).toBe(true);
+
+    const nulled = validateTransaction(
+      wrap(CREATE, {
+        ...MIN_COLLECTION_VALUE(),
+        invariants: { noCustomOwnershipTimes: true, maxSupplyPerId: '0', cosmosCoinBackedPath: null }
+      })
+    );
+    expect(nulled.valid).toBe(true);
+  });
+
+  it('passes when cosmosCoinBackedPath has a non-empty conversion.sideA.denom', () => {
+    const result = validateTransaction(
+      wrap(CREATE, {
+        ...MIN_COLLECTION_VALUE(),
+        invariants: {
+          noCustomOwnershipTimes: true,
+          maxSupplyPerId: '0',
+          cosmosCoinBackedPath: {
+            conversion: {
+              sideA: { amount: '1', denom: 'ibc/F082B65C88E4B6D5EF1DB243CDA1D331D002759E938A0F5CD3FFDC5D53B3E349' },
+              sideB: []
+            }
+          }
+        }
+      })
+    );
+    expect(result.valid).toBe(true);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // User-level approval msg branches
 // ---------------------------------------------------------------------------

@@ -57,6 +57,226 @@ const REQUIRED_DEFAULT_BALANCES_FIELDS = ['balances', 'outgoingApprovals', 'inco
  */
 const REQUIRED_APPROVAL_FIELDS = ['fromListId', 'toListId', 'initiatedByListId', 'approvalId', 'tokenIds', 'transferTimes', 'ownershipTimes', 'version'];
 
+/**
+ * Registered protobuf Msg typeUrls supported across BitBadges, Cosmos SDK,
+ * IBC, CosmWasm, GAMM, PoolManager, and EVM modules.
+ */
+export const KNOWN_MESSAGE_TYPE_URLS: ReadonlySet<string> = new Set([
+  // BitBadges tokenization
+  '/tokenization.MsgCastVote',
+  '/tokenization.MsgCreateAddressLists',
+  '/tokenization.MsgCreateCollection',
+  '/tokenization.MsgCreateDynamicStore',
+  '/tokenization.MsgDeleteCollection',
+  '/tokenization.MsgDeleteDynamicStore',
+  '/tokenization.MsgDeleteIncomingApproval',
+  '/tokenization.MsgDeleteOutgoingApproval',
+  '/tokenization.MsgPurgeApprovals',
+  '/tokenization.MsgSetCollectionApprovals',
+  '/tokenization.MsgSetCollectionMetadata',
+  '/tokenization.MsgSetCustomData',
+  '/tokenization.MsgSetDynamicStoreValue',
+  '/tokenization.MsgSetIncomingApproval',
+  '/tokenization.MsgSetIsArchived',
+  '/tokenization.MsgSetManager',
+  '/tokenization.MsgSetOutgoingApproval',
+  '/tokenization.MsgSetReservedProtocolAddress',
+  '/tokenization.MsgSetStandards',
+  '/tokenization.MsgSetTokenMetadata',
+  '/tokenization.MsgSetValidTokenIds',
+  '/tokenization.MsgTransferTokens',
+  '/tokenization.MsgUniversalUpdateCollection',
+  '/tokenization.MsgUpdateCollection',
+  '/tokenization.MsgUpdateDynamicStore',
+  '/tokenization.MsgUpdateParams',
+  '/tokenization.MsgUpdateUserApprovals',
+  // BitBadges auxiliary modules
+  '/managersplitter.MsgCreateManagerSplitter',
+  '/managersplitter.MsgDeleteManagerSplitter',
+  '/managersplitter.MsgExecuteUniversalUpdateCollection',
+  '/managersplitter.MsgUpdateManagerSplitter',
+  '/managersplitter.MsgUpdateParams',
+  '/maps.MsgCreateMap',
+  '/maps.MsgDeleteMap',
+  '/maps.MsgSetValue',
+  '/maps.MsgUpdateMap',
+  '/maps.MsgUpdateParams',
+  '/protocols.MsgCreateProtocol',
+  '/protocols.MsgDeleteProtocol',
+  '/protocols.MsgSetCollectionForProtocol',
+  '/protocols.MsgUnsetCollectionForProtocol',
+  '/protocols.MsgUpdateProtocol',
+  '/sendmanager.MsgSendWithAliasRouting',
+  '/sendmanager.MsgUpdateParams',
+  // GAMM & PoolManager
+  '/gamm.poolmodels.balancer.MsgCreateBalancerPool',
+  '/gamm.poolmodels.stableswap.MsgCreateStableswapPool',
+  '/gamm.poolmodels.stableswap.MsgStableSwapAdjustScalingFactors',
+  '/gamm.v1beta1.MsgExitPool',
+  '/gamm.v1beta1.MsgExitSwapExternAmountOut',
+  '/gamm.v1beta1.MsgExitSwapShareAmountIn',
+  '/gamm.v1beta1.MsgJoinPool',
+  '/gamm.v1beta1.MsgJoinSwapExternAmountIn',
+  '/gamm.v1beta1.MsgJoinSwapShareAmountOut',
+  '/gamm.v1beta1.MsgSwapExactAmountIn',
+  '/gamm.v1beta1.MsgSwapExactAmountInWithIBCTransfer',
+  '/gamm.v1beta1.MsgSwapExactAmountOut',
+  '/poolmanager.v1beta1.MsgSetDenomPairTakerFee',
+  '/poolmanager.v1beta1.MsgSetRegisteredAlloyedPool',
+  '/poolmanager.v1beta1.MsgSetTakerFeeShareAgreementForDenom',
+  '/poolmanager.v1beta1.MsgSplitRouteSwapExactAmountIn',
+  '/poolmanager.v1beta1.MsgSplitRouteSwapExactAmountOut',
+  '/poolmanager.v1beta1.MsgSwapExactAmountIn',
+  '/poolmanager.v1beta1.MsgSwapExactAmountOut',
+  // Cosmos SDK & EVM
+  '/cosmos.auth.v1beta1.MsgUpdateParams',
+  '/cosmos.authz.v1beta1.MsgExec',
+  '/cosmos.authz.v1beta1.MsgGrant',
+  '/cosmos.authz.v1beta1.MsgRevoke',
+  '/cosmos.bank.v1beta1.MsgMultiSend',
+  '/cosmos.bank.v1beta1.MsgSend',
+  '/cosmos.bank.v1beta1.MsgSetSendEnabled',
+  '/cosmos.bank.v1beta1.MsgUpdateParams',
+  '/cosmos.consensus.v1.MsgUpdateParams',
+  '/cosmos.counter.v1.MsgIncreaseCounter',
+  '/cosmos.crisis.v1beta1.MsgUpdateParams',
+  '/cosmos.crisis.v1beta1.MsgVerifyInvariant',
+  '/cosmos.distribution.v1beta1.MsgCommunityPoolSpend',
+  '/cosmos.distribution.v1beta1.MsgDepositValidatorRewardsPool',
+  '/cosmos.distribution.v1beta1.MsgFundCommunityPool',
+  '/cosmos.distribution.v1beta1.MsgSetWithdrawAddress',
+  '/cosmos.distribution.v1beta1.MsgUpdateParams',
+  '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
+  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
+  '/cosmos.evidence.v1beta1.MsgSubmitEvidence',
+  '/cosmos.evm.erc20.v1.MsgConvertCoin',
+  '/cosmos.evm.erc20.v1.MsgConvertERC20',
+  '/cosmos.evm.erc20.v1.MsgRegisterERC20',
+  '/cosmos.evm.erc20.v1.MsgToggleConversion',
+  '/cosmos.evm.erc20.v1.MsgUpdateParams',
+  '/cosmos.evm.feemarket.v1.MsgUpdateParams',
+  '/cosmos.evm.vm.v1.MsgEthereumTx',
+  '/cosmos.evm.vm.v1.MsgRegisterPreinstalls',
+  '/cosmos.evm.vm.v1.MsgUpdateParams',
+  '/cosmos.feegrant.v1beta1.MsgGrantAllowance',
+  '/cosmos.feegrant.v1beta1.MsgPruneAllowances',
+  '/cosmos.feegrant.v1beta1.MsgRevokeAllowance',
+  '/cosmos.gov.v1.MsgCancelProposal',
+  '/cosmos.gov.v1.MsgDeposit',
+  '/cosmos.gov.v1.MsgExecLegacyContent',
+  '/cosmos.gov.v1.MsgSubmitProposal',
+  '/cosmos.gov.v1.MsgUpdateParams',
+  '/cosmos.gov.v1.MsgVote',
+  '/cosmos.gov.v1.MsgVoteWeighted',
+  '/cosmos.gov.v1beta1.MsgDeposit',
+  '/cosmos.gov.v1beta1.MsgSubmitProposal',
+  '/cosmos.gov.v1beta1.MsgVote',
+  '/cosmos.gov.v1beta1.MsgVoteWeighted',
+  '/cosmos.group.v1.MsgCreateGroup',
+  '/cosmos.group.v1.MsgCreateGroupPolicy',
+  '/cosmos.group.v1.MsgCreateGroupWithPolicy',
+  '/cosmos.group.v1.MsgExec',
+  '/cosmos.group.v1.MsgLeaveGroup',
+  '/cosmos.group.v1.MsgSubmitProposal',
+  '/cosmos.group.v1.MsgUpdateGroupAdmin',
+  '/cosmos.group.v1.MsgUpdateGroupMembers',
+  '/cosmos.group.v1.MsgUpdateGroupMetadata',
+  '/cosmos.group.v1.MsgUpdateGroupPolicyAdmin',
+  '/cosmos.group.v1.MsgUpdateGroupPolicyDecisionPolicy',
+  '/cosmos.group.v1.MsgUpdateGroupPolicyMetadata',
+  '/cosmos.group.v1.MsgVote',
+  '/cosmos.group.v1.MsgWithdrawProposal',
+  '/cosmos.mint.v1beta1.MsgUpdateParams',
+  '/cosmos.nft.v1beta1.MsgSend',
+  '/cosmos.protocolpool.v1.MsgCancelContinuousFund',
+  '/cosmos.protocolpool.v1.MsgCommunityPoolSpend',
+  '/cosmos.protocolpool.v1.MsgCreateContinuousFund',
+  '/cosmos.protocolpool.v1.MsgFundCommunityPool',
+  '/cosmos.protocolpool.v1.MsgUpdateParams',
+  '/cosmos.slashing.v1beta1.MsgUnjail',
+  '/cosmos.slashing.v1beta1.MsgUpdateParams',
+  '/cosmos.staking.v1beta1.MsgBeginRedelegate',
+  '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation',
+  '/cosmos.staking.v1beta1.MsgCreateValidator',
+  '/cosmos.staking.v1beta1.MsgDelegate',
+  '/cosmos.staking.v1beta1.MsgEditValidator',
+  '/cosmos.staking.v1beta1.MsgUndelegate',
+  '/cosmos.staking.v1beta1.MsgUpdateParams',
+  '/cosmos.upgrade.v1beta1.MsgCancelUpgrade',
+  '/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade',
+  '/cosmos.vesting.v1beta1.MsgCreatePeriodicVestingAccount',
+  '/cosmos.vesting.v1beta1.MsgCreatePermanentLockedAccount',
+  '/cosmos.vesting.v1beta1.MsgCreateVestingAccount',
+  // CosmWasm
+  '/cosmwasm.wasm.v1.MsgAddCodeUploadParamsAddresses',
+  '/cosmwasm.wasm.v1.MsgClearAdmin',
+  '/cosmwasm.wasm.v1.MsgExecuteContract',
+  '/cosmwasm.wasm.v1.MsgIBCCloseChannel',
+  '/cosmwasm.wasm.v1.MsgIBCSend',
+  '/cosmwasm.wasm.v1.MsgInstantiateContract',
+  '/cosmwasm.wasm.v1.MsgInstantiateContract2',
+  '/cosmwasm.wasm.v1.MsgMigrateContract',
+  '/cosmwasm.wasm.v1.MsgPinCodes',
+  '/cosmwasm.wasm.v1.MsgRemoveCodeUploadParamsAddresses',
+  '/cosmwasm.wasm.v1.MsgStoreAndInstantiateContract',
+  '/cosmwasm.wasm.v1.MsgStoreAndMigrateContract',
+  '/cosmwasm.wasm.v1.MsgStoreCode',
+  '/cosmwasm.wasm.v1.MsgSudoContract',
+  '/cosmwasm.wasm.v1.MsgUnpinCodes',
+  '/cosmwasm.wasm.v1.MsgUpdateAdmin',
+  '/cosmwasm.wasm.v1.MsgUpdateContractLabel',
+  '/cosmwasm.wasm.v1.MsgUpdateInstantiateConfig',
+  '/cosmwasm.wasm.v1.MsgUpdateParams',
+  // IBC
+  '/ibc.applications.fee.v1.MsgPayPacketFee',
+  '/ibc.applications.fee.v1.MsgPayPacketFeeAsync',
+  '/ibc.applications.fee.v1.MsgRegisterCounterpartyPayee',
+  '/ibc.applications.fee.v1.MsgRegisterPayee',
+  '/ibc.applications.gmp.v1.MsgSendCall',
+  '/ibc.applications.interchain_accounts.controller.v1.MsgRegisterInterchainAccount',
+  '/ibc.applications.interchain_accounts.controller.v1.MsgSendTx',
+  '/ibc.applications.interchain_accounts.controller.v1.MsgUpdateParams',
+  '/ibc.applications.interchain_accounts.host.v1.MsgModuleQuerySafe',
+  '/ibc.applications.interchain_accounts.host.v1.MsgUpdateParams',
+  '/ibc.applications.rate_limiting.v1.MsgAddRateLimit',
+  '/ibc.applications.rate_limiting.v1.MsgRemoveRateLimit',
+  '/ibc.applications.rate_limiting.v1.MsgResetRateLimit',
+  '/ibc.applications.rate_limiting.v1.MsgUpdateRateLimit',
+  '/ibc.applications.transfer.v1.MsgTransfer',
+  '/ibc.applications.transfer.v1.MsgUpdateParams',
+  '/ibc.core.channel.v1.MsgAcknowledgement',
+  '/ibc.core.channel.v1.MsgChannelCloseConfirm',
+  '/ibc.core.channel.v1.MsgChannelCloseInit',
+  '/ibc.core.channel.v1.MsgChannelOpenAck',
+  '/ibc.core.channel.v1.MsgChannelOpenConfirm',
+  '/ibc.core.channel.v1.MsgChannelOpenInit',
+  '/ibc.core.channel.v1.MsgChannelOpenTry',
+  '/ibc.core.channel.v1.MsgRecvPacket',
+  '/ibc.core.channel.v1.MsgTimeout',
+  '/ibc.core.channel.v1.MsgTimeoutOnClose',
+  '/ibc.core.channel.v2.MsgAcknowledgement',
+  '/ibc.core.channel.v2.MsgRecvPacket',
+  '/ibc.core.channel.v2.MsgSendPacket',
+  '/ibc.core.channel.v2.MsgTimeout',
+  '/ibc.core.client.v1.MsgCreateClient',
+  '/ibc.core.client.v1.MsgDeleteClientCreator',
+  '/ibc.core.client.v1.MsgIBCSoftwareUpgrade',
+  '/ibc.core.client.v1.MsgRecoverClient',
+  '/ibc.core.client.v1.MsgUpdateClient',
+  '/ibc.core.client.v1.MsgUpdateParams',
+  '/ibc.core.client.v1.MsgUpgradeClient',
+  '/ibc.core.client.v2.MsgRegisterCounterparty',
+  '/ibc.core.client.v2.MsgUpdateClientConfig',
+  '/ibc.core.connection.v1.MsgConnectionOpenAck',
+  '/ibc.core.connection.v1.MsgConnectionOpenConfirm',
+  '/ibc.core.connection.v1.MsgConnectionOpenInit',
+  '/ibc.core.connection.v1.MsgConnectionOpenTry',
+  '/ibc.core.connection.v1.MsgUpdateParams',
+  '/ibc.lightclients.wasm.v1.MsgMigrateContract',
+  '/ibc.lightclients.wasm.v1.MsgRemoveChecksum',
+  '/ibc.lightclients.wasm.v1.MsgStoreCode'
+]);
+
 // ---------------------------------------------------------------------------
 // Helper validators
 // ---------------------------------------------------------------------------
@@ -986,6 +1206,15 @@ export function validateTransaction(txBody: any): ValidationResult {
     return { valid: false, issues };
   }
 
+  if (transaction.messages.length === 0) {
+    issues.push({
+      severity: 'error',
+      message: 'Transaction "messages" array must not be empty. Include at least one message.',
+      path: 'messages'
+    });
+    return { valid: false, issues };
+  }
+
   // Check all numbers are strings
   checkNumbersAreStrings(txBody, '', issues);
 
@@ -994,22 +1223,56 @@ export function validateTransaction(txBody: any): ValidationResult {
 
   // Validate each message
   (transaction.messages as unknown[]).forEach((msg, msgIndex) => {
-    if (!msg || typeof msg !== 'object') return;
+    const msgPath = `messages[${msgIndex}]`;
+    if (!msg || typeof msg !== 'object' || Array.isArray(msg)) {
+      issues.push({
+        severity: 'error',
+        message: `Message must be a JSON object with "typeUrl" and "value" fields, got ${msg === null ? 'null' : Array.isArray(msg) ? 'array' : typeof msg}`,
+        path: msgPath
+      });
+      return;
+    }
 
     const message = msg as Record<string, unknown>;
-    const msgPath = `messages[${msgIndex}]`;
 
     // Check typeUrl
-    if (!message.typeUrl || typeof message.typeUrl !== 'string') {
+    let normalizedTypeUrl = '';
+    if (!message.typeUrl || typeof message.typeUrl !== 'string' || !message.typeUrl.trim()) {
       issues.push({
         severity: 'error',
         message: 'Message missing "typeUrl" field',
         path: msgPath
       });
+    } else {
+      normalizedTypeUrl = (message.typeUrl as string).trim();
+      if (normalizedTypeUrl.startsWith('/badges.') || normalizedTypeUrl.startsWith('badges.')) {
+        const candidate = normalizedTypeUrl.replace(/^\/?badges\./, '/tokenization.');
+        const hint = KNOWN_MESSAGE_TYPE_URLS.has(candidate)
+          ? ` Use "${candidate}" instead.`
+          : ' The legacy "/badges.*" namespace was renamed to "/tokenization.*".';
+        issues.push({
+          severity: 'error',
+          message: `Legacy/unknown message typeUrl "${normalizedTypeUrl}".${hint}`,
+          path: `${msgPath}.typeUrl`
+        });
+      } else if (!KNOWN_MESSAGE_TYPE_URLS.has(normalizedTypeUrl)) {
+        const withSlash = normalizedTypeUrl.startsWith('/') ? '' : `/${normalizedTypeUrl}`;
+        const hint =
+          withSlash && KNOWN_MESSAGE_TYPE_URLS.has(withSlash)
+            ? ` Did you mean "${withSlash}" (missing leading "/")?`
+            : normalizedTypeUrl.startsWith('/tokenization.')
+              ? ' Check the message name (e.g. "/tokenization.MsgCreateCollection", "/tokenization.MsgUpdateCollection", "/tokenization.MsgTransferTokens").'
+              : ' Expected a registered BitBadges, Cosmos SDK, IBC, CosmWasm, GAMM, or EVM protobuf typeUrl.';
+        issues.push({
+          severity: 'error',
+          message: `Unknown message typeUrl "${normalizedTypeUrl}".${hint}`,
+          path: `${msgPath}.typeUrl`
+        });
+      }
     }
 
     // Check value
-    if (!message.value || typeof message.value !== 'object') {
+    if (!message.value || typeof message.value !== 'object' || Array.isArray(message.value)) {
       issues.push({
         severity: 'error',
         message: 'Message missing "value" object',
@@ -1026,10 +1289,9 @@ export function validateTransaction(txBody: any): ValidationResult {
     // Update rejects `defaultBalances` + `invariants`. Validation is
     // field-driven, not type-url-driven, so the same rules apply and we
     // only branch on type-url for the two create/update-specific checks.
-    const _tUrl = typeof message.typeUrl === 'string' ? message.typeUrl : '';
-    const _isCreate = _tUrl.endsWith('.MsgCreateCollection');
-    const _isUpdate = _tUrl.endsWith('.MsgUpdateCollection');
-    const _isUniversal = _tUrl.endsWith('.MsgUniversalUpdateCollection');
+    const _isCreate = normalizedTypeUrl === '/tokenization.MsgCreateCollection';
+    const _isUpdate = normalizedTypeUrl === '/tokenization.MsgUpdateCollection';
+    const _isUniversal = normalizedTypeUrl === '/tokenization.MsgUniversalUpdateCollection';
     if (_isCreate || _isUpdate || _isUniversal) {
       // --- Constructor sanity check: ensure all fields the SDK constructor expects exist ---
       // MsgCreateCollection has no `updateXxxTimeline` flags — every field
@@ -1118,6 +1380,37 @@ export function validateTransaction(txBody: any): ValidationResult {
             message: 'MsgUpdateCollection must not set "invariants" (set at genesis only).',
             path: `${msgPath}.value.invariants`
           });
+        }
+      }
+
+      // Validate invariants.cosmosCoinBackedPath — a non-null path with an
+      // empty or missing conversion.sideA.denom (such as a zero-valued
+      // `{ conversion: { sideA: { amount: "0", denom: "" }, sideB: [] } }`)
+      // is rejected on-chain with "ibc denom cannot be empty".
+      if (value.invariants && typeof value.invariants === 'object') {
+        const inv = value.invariants as Record<string, unknown>;
+        if (inv.cosmosCoinBackedPath !== undefined && inv.cosmosCoinBackedPath !== null) {
+          if (typeof inv.cosmosCoinBackedPath !== 'object' || Array.isArray(inv.cosmosCoinBackedPath)) {
+            issues.push({
+              severity: 'error',
+              message:
+                'invariants.cosmosCoinBackedPath must be an object with a non-empty conversion.sideA.denom, or omit invariants.cosmosCoinBackedPath if this collection is not coin-backed.',
+              path: `${msgPath}.value.invariants.cosmosCoinBackedPath`
+            });
+          } else {
+            const backedPath = inv.cosmosCoinBackedPath as Record<string, unknown>;
+            const conversion = backedPath.conversion as Record<string, unknown> | undefined;
+            const sideA = conversion?.sideA as Record<string, unknown> | undefined;
+            const denom = sideA?.denom;
+            if (typeof denom !== 'string' || denom.trim() === '') {
+              issues.push({
+                severity: 'error',
+                message:
+                  'invariants.cosmosCoinBackedPath has an empty or missing conversion.sideA.denom (the chain rejects this with "ibc denom cannot be empty"). Remove invariants.cosmosCoinBackedPath or set conversion.sideA.denom to a non-empty denom.',
+                path: `${msgPath}.value.invariants.cosmosCoinBackedPath.conversion.sideA.denom`
+              });
+            }
+          }
         }
       }
 

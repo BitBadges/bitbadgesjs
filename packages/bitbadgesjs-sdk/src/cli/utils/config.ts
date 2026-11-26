@@ -45,14 +45,31 @@ export function loadConfig(): Config {
 }
 
 /**
- * Writes config to ~/.bitbadges/config.json. Creates directory if needed.
+ * Writes config to ~/.bitbadges/config.json. Creates directory with mode 0700
+ * and writes file with mode 0600, tightening permissions on existing entries.
  */
 export function saveConfig(config: Config): void {
   const dir = configDir();
+  const p = configPath();
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   }
-  fs.writeFileSync(configPath(), JSON.stringify(config, null, 2) + '\n', 'utf-8');
+  enforceMode(dir, 0o700);
+  fs.writeFileSync(p, JSON.stringify(config, null, 2) + '\n', { encoding: 'utf-8', mode: 0o600 });
+  enforceMode(p, 0o600);
+}
+
+function enforceMode(p: string, expectedMode: number): void {
+  if (process.platform === 'win32') return;
+  try {
+    const stat = fs.statSync(p);
+    const mode = stat.mode & 0o777;
+    if (mode !== expectedMode) {
+      fs.chmodSync(p, expectedMode);
+    }
+  } catch {
+    /* best-effort */
+  }
 }
 
 /**

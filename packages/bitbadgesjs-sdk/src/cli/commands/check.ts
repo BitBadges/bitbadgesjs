@@ -50,7 +50,7 @@ export const checkCommand = addNetworkOptions(
       condensed?: boolean;
     }
   ) => {
-    const { emit, emitError, commentary, isQuiet } = await import('../utils/envelope.js');
+    const { emit, emitError, isQuiet } = await import('../utils/envelope.js');
     const depth = (opts.depth || 'full').toLowerCase();
     if (!['structural', 'review', 'full'].includes(depth)) {
       emitError(
@@ -112,25 +112,6 @@ export const checkCommand = addNetworkOptions(
 
     // ── --depth structural ────────────────────────────────────────────
     if (depth === 'structural') {
-      // Empty messages array isn't a structural error per se but it's
-      // almost never what the user wanted.
-      if (Array.isArray(wrapped?.messages) && wrapped.messages.length === 0) {
-        const result = {
-          valid: true,
-          issues: [
-            {
-              severity: 'warning' as const,
-              path: 'messages',
-              message: 'Transaction has an empty messages array. Did you forget to add any messages?'
-            }
-          ]
-        };
-        commentary('▲ WARNING  messages: Transaction has an empty messages array.');
-        emit(result, opts);
-        process.exitCode = 1;
-        return;
-      }
-
       const { validateTransaction } = await import('../../core/validate.js');
       const result = validateTransaction(wrapped);
 
@@ -211,6 +192,16 @@ export const checkCommand = addNetworkOptions(
       review = reviewCollection(wrapped);
     }
 
+    const reviewSkipped =
+      opts.review !== false && !firstIsCollection
+        ? {
+            code: 'review_skipped',
+            severity: 'warning' as const,
+            message:
+              'Review skipped: collection design and standards review only applies to MsgCreateCollection, MsgUpdateCollection, and MsgUniversalUpdateCollection messages.'
+          }
+        : null;
+
     let design: any = null;
     if (firstIsCollection) {
       const { runDesignChecks } = await import('../../core/design-decisions/index.js');
@@ -231,6 +222,9 @@ export const checkCommand = addNetworkOptions(
       if (review) {
         lines.push(renderReview(review, { stream: process.stderr }));
         lines.push('');
+      } else if (reviewSkipped) {
+        lines.push(`▲ WARNING  ${reviewSkipped.code}: ${reviewSkipped.message}`);
+        lines.push('');
       }
       if (design && opts.design === true) {
         lines.push(renderDesignDecisions(design, { stream: process.stderr }));
@@ -249,6 +243,7 @@ export const checkCommand = addNetworkOptions(
     const payload = {
       validate: validation,
       review,
+      ...(reviewSkipped ? { reviewSkipped } : {}),
       design,
       metadata: {
         placeholders,
