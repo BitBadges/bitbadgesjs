@@ -59,6 +59,31 @@ describe('saveConfig', () => {
     saveConfig({ apiKey: 'second' });
     expect(loadConfig()).toEqual({ apiKey: 'second' });
   });
+
+  it('sets 0700 on config directory and 0600 on config.json', () => {
+    if (process.platform === 'win32') return;
+    const nestedDir = path.join(process.env.BITBADGES_CONFIG_DIR!, 'nested-new');
+    process.env.BITBADGES_CONFIG_DIR = nestedDir;
+
+    saveConfig({ apiKey: 'secret-key' });
+
+    expect(fs.statSync(nestedDir).mode & 0o777).toBe(0o700);
+    expect(fs.statSync(getConfigPath()).mode & 0o777).toBe(0o600);
+  });
+
+  it('tightens permissions on existing config directory and config.json on save', () => {
+    if (process.platform === 'win32') return;
+    const dir = process.env.BITBADGES_CONFIG_DIR!;
+    const cfgPath = getConfigPath();
+    fs.chmodSync(dir, 0o755);
+    fs.writeFileSync(cfgPath, '{"apiKey":"old"}\n', { encoding: 'utf-8', mode: 0o644 });
+    fs.chmodSync(cfgPath, 0o644);
+
+    saveConfig({ apiKey: 'updated-key' });
+
+    expect(fs.statSync(dir).mode & 0o777).toBe(0o700);
+    expect(fs.statSync(cfgPath).mode & 0o777).toBe(0o600);
+  });
 });
 
 describe('getConfigApiKey', () => {

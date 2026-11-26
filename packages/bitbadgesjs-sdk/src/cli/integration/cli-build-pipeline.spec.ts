@@ -404,6 +404,39 @@ describe('cli build pipeline integration', () => {
       const out = runCli(['check', tmp], { throwOnError: false, parseJson: false });
       expect(out.exitCode).not.toBe(0);
     });
+
+    it('rejects empty messages and unknown typeUrls', () => {
+      const emptyTmp = writeTmp({ messages: [] });
+      const emptyOut = runCli(['check', emptyTmp], { throwOnError: false });
+      expect(emptyOut.exitCode).toBe(2);
+      expect(emptyOut.envelope.ok).toBe(false);
+      expect(emptyOut.envelope.error.code).toBe('validation_failed');
+
+      const badTypeTmp = writeTmp({ messages: [{ typeUrl: '/tokenization.MsgNope', value: {} }] });
+      const badTypeOut = runCli(['check', badTypeTmp], { throwOnError: false });
+      expect(badTypeOut.exitCode).toBe(2);
+      expect(badTypeOut.envelope.ok).toBe(false);
+      expect(badTypeOut.envelope.error.code).toBe('validation_failed');
+    });
+
+    it('surfaces reviewSkipped warning when checking non-collection messages', () => {
+      const transferTmp = writeTmp({
+        messages: [
+          {
+            typeUrl: '/tokenization.MsgTransferTokens',
+            value: { creator: CREATOR, transfers: [{ prioritizedApprovals: [] }] }
+          }
+        ]
+      });
+      const out = runCli(['check', transferTmp]);
+      expect(out.exitCode).toBe(0);
+      expect(out.envelope.ok).toBe(true);
+      expect(out.json.review).toBeNull();
+      expect(out.json.reviewSkipped).toMatchObject({
+        code: 'review_skipped',
+        severity: 'warning'
+      });
+    });
   });
 
   describe('bb explain', () => {

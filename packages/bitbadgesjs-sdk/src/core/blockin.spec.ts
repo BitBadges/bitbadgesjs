@@ -181,4 +181,44 @@ describe('generateBitBadgesAuthUrl', () => {
     // boolean true is not an object, so it should be serialized directly
     expect(url).toContain('hideIfAlreadyClaimed=true');
   });
+
+  it('should round-trip base64 state with +, /, and = via URLSearchParams', () => {
+    const state = 'eyJyZXR1cm5UbyI6Ii9kYXNoIn0=+/=';
+    const url = generateBitBadgesAuthUrl({
+      client_id: 'my-app',
+      state,
+      scope: 'completeClaims'
+    });
+    const params = new URL(url).searchParams;
+    expect(params.get('state')).toBe(state);
+    expect(params.get('scope')).toBe('completeClaims');
+  });
+
+  it('should round-trip redirect_uri containing its own query parameters', () => {
+    const redirect_uri = 'https://example.com/api/callback?provider=bitbadges&env=prod';
+    const url = generateBitBadgesAuthUrl({
+      client_id: 'my-app',
+      redirect_uri,
+      scope: 'completeClaims,approveSignInWithBitBadges'
+    });
+    const params = new URL(url).searchParams;
+    expect(params.get('redirect_uri')).toBe(redirect_uri);
+    expect(params.get('scope')).toBe('completeClaims,approveSignInWithBitBadges');
+    expect(params.get('env')).toBeNull();
+    expect([...params.keys()].sort()).toEqual(['client_id', 'redirect_uri', 'scope']);
+  });
+
+  it('should round-trip state containing &, =, and # without dropping trailing params', () => {
+    const state = 'csrf=1&next=/a#frag';
+    const url = generateBitBadgesAuthUrl({
+      client_id: 'my-app',
+      state,
+      scope: 'completeClaims'
+    });
+    const parsed = new URL(url);
+    expect(parsed.hash).toBe('');
+    expect(parsed.searchParams.get('state')).toBe(state);
+    expect(parsed.searchParams.get('scope')).toBe('completeClaims');
+    expect(parsed.searchParams.get('next')).toBeNull();
+  });
 });

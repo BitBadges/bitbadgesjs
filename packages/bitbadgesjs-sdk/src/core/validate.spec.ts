@@ -906,4 +906,59 @@ describe('validateTransaction', () => {
     expect(result.valid).toBe(true);
     expect(result.issues.length).toBeGreaterThan(0);
   });
+
+  it('returns error for empty messages array', () => {
+    const result = validateTransaction({ messages: [] });
+    expect(result.valid).toBe(false);
+    expect(result.issues.some((i) => i.severity === 'error' && i.path === 'messages' && /empty/i.test(i.message))).toBe(true);
+  });
+
+  it('returns error for non-object message entries', () => {
+    const result = validateTransaction({ messages: ['hello', null, []] });
+    expect(result.valid).toBe(false);
+    expect(result.issues.filter((i) => i.severity === 'error')).toHaveLength(3);
+    expect(result.issues[0].path).toBe('messages[0]');
+    expect(result.issues[1].path).toBe('messages[1]');
+    expect(result.issues[2].path).toBe('messages[2]');
+  });
+
+  it('returns error for unknown /tokenization.* typeUrl', () => {
+    const result = validateTransaction({
+      messages: [{ typeUrl: '/tokenization.MsgNope', value: { creator: 'bb1abc' } }]
+    });
+    expect(result.valid).toBe(false);
+    expect(
+      result.issues.some(
+        (i) => i.severity === 'error' && i.path === 'messages[0].typeUrl' && i.message.includes('/tokenization.MsgNope')
+      )
+    ).toBe(true);
+  });
+
+  it('returns error with /tokenization.* hint for legacy /badges.* typeUrl', () => {
+    const result = validateTransaction({
+      messages: [{ typeUrl: '/badges.MsgCreateCollection', value: { creator: 'bb1abc' } }]
+    });
+    expect(result.valid).toBe(false);
+    expect(
+      result.issues.some(
+        (i) =>
+          i.severity === 'error' &&
+          i.path === 'messages[0].typeUrl' &&
+          i.message.includes('/badges.MsgCreateCollection') &&
+          i.message.includes('/tokenization.MsgCreateCollection')
+      )
+    ).toBe(true);
+  });
+
+  it('accepts registered Cosmos SDK and IBC message typeUrls', () => {
+    const result = validateTransaction({
+      messages: [
+        {
+          typeUrl: '/cosmos.bank.v1beta1.MsgSend',
+          value: { fromAddress: 'bb1a', toAddress: 'bb1b', amount: [{ denom: 'ubadge', amount: '1' }] }
+        }
+      ]
+    });
+    expect(result.valid).toBe(true);
+  });
 });
