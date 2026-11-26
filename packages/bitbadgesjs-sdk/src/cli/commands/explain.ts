@@ -1,6 +1,12 @@
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
-import { emit, addOutputOptions } from '../utils/envelope.js';
+import { emit, emitError, addOutputOptions, BBErrorCode } from '../utils/envelope.js';
+
+function requiresApiKeyForExplain(opts: { network?: string; local?: boolean; url?: string }): boolean {
+  if (opts.network === 'local' || opts.local) return false;
+  if (opts.url && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?(\/|$)/i.test(opts.url)) return false;
+  return true;
+}
 
 /**
  * Plain-English explanation of a transaction body or a collection.
@@ -16,8 +22,19 @@ export const explainCommand = addOutputOptions(
       .argument('<input>', 'Tx / collection JSON file path, inline JSON, numeric collection id, or "-" for stdin')
   )
 ).action(
-  async (input: string, opts: { network?: 'mainnet' | 'local' | 'testnet'; testnet?: boolean; local?: boolean; url?: string; outputFile?: string; condensed?: boolean }) => {
-    const { readJsonInput, getApiUrl, getApiKeyForNetwork } = await import('../utils/io.js');
+  async (
+    input: string,
+    opts: {
+      network?: 'mainnet' | 'local' | 'testnet';
+      testnet?: boolean;
+      local?: boolean;
+      url?: string;
+      apiKey?: string;
+      outputFile?: string;
+      condensed?: boolean;
+    }
+  ) => {
+    const { readJsonInput, getApiUrl, getApiKeyForNetwork, resolveNetwork } = await import('../utils/io.js');
     let data: any;
     let fetchedCollection = false;
 
@@ -25,27 +42,73 @@ export const explainCommand = addOutputOptions(
     if (/^\d+$/.test(input)) {
       const baseUrl = getApiUrl(opts);
       const apiKey = getApiKeyForNetwork(opts) || '';
-      try {
-        const response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
-          headers: { 'x-api-key': apiKey }
-        });
-        if (!response.ok) {
-          process.stderr.write(
-            `Could not fetch collection ${input} from ${baseUrl} — HTTP ${response.status}.\n` +
-              `Hint: HTTP 401/403 usually means no API key — set BITBADGES_API_KEY or run \`bb settings set apiKey <key>\`.\n` +
-              `Try passing the collection JSON directly (file or inline) instead of a numeric id.\n`
-          );
-          process.exit(2);
-        }
-        data = await response.json();
-        fetchedCollection = true;
-      } catch (err: any) {
-        process.stderr.write(
-          `Could not reach ${baseUrl}/api/v0/collection/${input}: ${err?.message || err}.\n` +
-            `Check that the network is reachable, or pass the collection JSON directly.\n`
+      if (!apiKey && requiresApiKeyForExplain(opts)) {
+        emitError(
+          new Error(
+            `No API key configured for ${resolveNetwork(opts)} (${baseUrl}). ` +
+              `Fetching collection ${input} requires a BitBadges API key.`
+          ),
+          {
+            code: BBErrorCode.MISSING_API_KEY,
+            hint: 'Set BITBADGES_API_KEY, pass --api-key <key>, or run `bb settings set apiKey <key>`. You can also pass collection JSON directly instead of a numeric id.',
+            condensed: opts.condensed,
+            exitCode: 2
+          }
         );
-        process.exit(2);
       }
+      let response: Response;
+      try {
+        response = await fetch(`${baseUrl}/api/v0/collection/${input}`, {
+          headers: apiKey ? { 'x-api-key': apiKey } : {}
+        });
+      } catch (err: any) {
+        emitError(
+          new Error(`Could not reach ${baseUrl}/api/v0/collection/${input}: ${err?.message || err}.`),
+          {
+            code: BBErrorCode.NETWORK_ERROR,
+            hint: 'Check that the network is reachable, or pass the collection JSON directly.',
+            condensed: opts.condensed,
+            exitCode: 2
+          }
+        );
+      }
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          emitError(
+            new Error(
+              `Could not fetch collection ${input} from ${baseUrl} — HTTP ${response.status} (missing or invalid API key).`
+            ),
+            {
+              code: BBErrorCode.MISSING_API_KEY,
+              hint: 'Set BITBADGES_API_KEY, pass --api-key <key>, or run `bb settings set apiKey <key>`. You can also pass collection JSON directly instead of a numeric id.',
+              condensed: opts.condensed,
+              exitCode: 2
+            }
+          );
+        }
+        emitError(
+          new Error(`Could not fetch collection ${input} from ${baseUrl} — HTTP ${response.status}.`),
+          {
+            code: response.status === 404 ? 'not_found' : 'fetch_failed',
+            hint: 'Try passing the collection JSON directly (file or inline) instead of a numeric id.',
+            condensed: opts.condensed,
+            exitCode: 2
+          }
+        );
+      }
+      try {
+        data = await response.json();
+      } catch (err: any) {
+        emitError(
+          new Error(`Invalid JSON response from ${baseUrl}/api/v0/collection/${input}: ${err?.message || err}.`),
+          {
+            code: 'fetch_failed',
+            condensed: opts.condensed,
+            exitCode: 2
+          }
+        );
+      }
+      fetchedCollection = true;
     } else {
       try {
         data = readJsonInput(input);
@@ -59,10 +122,14 @@ export const explainCommand = addOutputOptions(
         // See check.ts: strip readJsonInput's own "Accepts:" hint before adding ours.
         const detail = String(err?.message || err).replace(/\s*Accepts:[\s\S]*$/, '').replace(/\.+$/, '');
         const reason = detail.startsWith('Failed to parse') ? detail : `Failed to parse input JSON: ${detail}`;
-        process.stderr.write(
-          `${reason}.\n` + `Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.\n`
+        emitError(
+          new Error(`${reason}. Accepts: file path, @file.json, inline JSON, numeric collection id, or - for stdin.`),
+          {
+            code: BBErrorCode.INVALID_INPUT,
+            condensed: opts.condensed,
+            exitCode: 2
+          }
         );
-        process.exit(2);
       }
     }
 
@@ -128,15 +195,14 @@ export const explainCommand = addOutputOptions(
         }
       }
     } catch (err: any) {
-      process.stderr.write(
-        `Could not interpret input: ${err?.message || err}.\n` +
-          `Hint: \`explain\` expects either a full transaction (with messages[]),\n` +
-          `a single Msg ({typeUrl, value}), a complete on-chain collection document\n` +
-          `(returned by query_collection), or a numeric collection id. Minimal ad-hoc\n` +
-          `JSON like {collectionId:"1"} is not a valid input — it lacks the fields the\n` +
-          `interpreter needs (collectionMetadata.uri, validTokenIds, etc).\n`
-      );
-      process.exit(2);
+      emitError(new Error(`Could not interpret input: ${err?.message || err}.`), {
+        code: BBErrorCode.INVALID_INPUT,
+        hint:
+          'Pass a full transaction (with messages[]), a single Msg ({typeUrl, value}), ' +
+          'a complete on-chain collection document (returned by query_collection), or a numeric collection id.',
+        condensed: opts.condensed,
+        exitCode: 2
+      });
     }
 
     emit({ kind, messages, fullText: text }, opts);

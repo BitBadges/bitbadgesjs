@@ -513,4 +513,49 @@ describe('keyring multi-tx collection binding', () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  it('deploy --with-keyring --local forwards --chain-id, --keyring-dir, and --home (BB-315)', () => {
+    const tmpFile = path.join(os.tmpdir(), `bb-deploy-keyring-${Date.now()}.json`);
+    fs.writeFileSync(
+      tmpFile,
+      JSON.stringify({
+        typeUrl: '/tokenization.MsgCreateCollection',
+        value: { creator: 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv', validTokenIds: [] }
+      })
+    );
+    try {
+      const cliTs = path.resolve(__dirname, '../index.ts');
+      const res = spawnSync(
+        'bun',
+        [
+          cliTs,
+          'deploy',
+          '--with-keyring',
+          '--from',
+          'alice',
+          '--local',
+          '--chain-id',
+          'bitbadges-local-42',
+          '--keyring-dir',
+          '/tmp/my-keyring',
+          '--home',
+          '/tmp/my-home',
+          '--msg-file',
+          tmpFile
+        ],
+        { encoding: 'utf-8', timeout: 15_000, env: { ...process.env, BB_QUIET: '1' } }
+      );
+      expect(res.status).toBe(0);
+      const env = JSON.parse(res.stdout);
+      expect(env.ok).toBe(true);
+      expect(env.data.commandLine).toContain('--chain-id bitbadges-local-42');
+      expect(env.data.commandLine).toContain('--keyring-dir /tmp/my-keyring');
+      expect(env.data.commandLine).toContain('--home /tmp/my-home');
+      if (Array.isArray(env.data.msgFilePaths) && env.data.msgFilePaths[0] && fs.existsSync(env.data.msgFilePaths[0])) {
+        fs.rmSync(path.dirname(env.data.msgFilePaths[0]), { recursive: true, force: true });
+      }
+    } finally {
+      fs.unlinkSync(tmpFile);
+    }
+  });
 });

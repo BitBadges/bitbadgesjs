@@ -326,23 +326,31 @@ export class GetTransferActivityForUserSuccessResponse<T extends NumberType>
 
 /**
  * @category API Requests / Responses */
-export interface iGetTokensViewForUserSuccessResponse<T extends NumberType> extends iBaseSuccessResponse {
-  tokens: Array<iBalanceDocWithDetails<T>>;
+export interface iGetTokensViewForUserSuccessResponse<
+  T extends NumberType,
+  TokenItem extends iBalanceDocWithDetails<T> | string = iBalanceDocWithDetails<T> | string
+> extends iBaseSuccessResponse {
+  tokens: Array<TokenItem>;
 }
 
 /**
  * @category API Requests / Responses
  */
-export class GetTokensViewForUserSuccessResponse<T extends NumberType>
-  extends BaseNumberTypeClass<GetTokensViewForUserSuccessResponse<T>>
-  implements iGetTokensViewForUserSuccessResponse<T>
+export class GetTokensViewForUserSuccessResponse<
+  T extends NumberType,
+  TokenItem extends BalanceDocWithDetails<T> | string = BalanceDocWithDetails<T> | string
+>
+  extends BaseNumberTypeClass<GetTokensViewForUserSuccessResponse<T, TokenItem>>
+  implements iGetTokensViewForUserSuccessResponse<T, TokenItem>
 {
-  tokens: BalanceDocWithDetails<T>[];
+  tokens: TokenItem[];
   pagination: PaginationInfo;
 
-  constructor(data: iGetTokensViewForUserSuccessResponse<T>) {
+  constructor(data: iGetTokensViewForUserSuccessResponse<T, any>) {
     super();
-    this.tokens = data.tokens.map((token) => new BalanceDocWithDetails(token));
+    this.tokens = (data.tokens ?? []).map((token: iBalanceDocWithDetails<T> | string) =>
+      typeof token === 'string' ? token : new BalanceDocWithDetails(token)
+    ) as TokenItem[];
     this.pagination = data.pagination;
   }
 
@@ -350,8 +358,18 @@ export class GetTokensViewForUserSuccessResponse<T extends NumberType>
     return [];
   }
 
-  convert<U extends NumberType>(convertFunction: (val: NumberType) => U, options?: ConvertOptions): GetTokensViewForUserSuccessResponse<U> {
-    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as GetTokensViewForUserSuccessResponse<U>;
+  convert<U extends NumberType>(
+    convertFunction: (val: NumberType) => U,
+    options?: ConvertOptions
+  ): GetTokensViewForUserSuccessResponse<
+    U,
+    TokenItem extends string
+      ? string
+      : TokenItem extends BalanceDocWithDetails<T>
+        ? BalanceDocWithDetails<U>
+        : BalanceDocWithDetails<U> | string
+  > {
+    return convertClassPropertiesAndMaintainNumberTypes(this, convertFunction, options) as any;
   }
 }
 

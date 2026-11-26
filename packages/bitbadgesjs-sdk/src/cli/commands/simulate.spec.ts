@@ -5,6 +5,10 @@
  * territory (no runCli in unit specs, per project convention).
  */
 
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { simulateCommand, ensureTxWrapper, requiresApiKey } from './simulate.js';
 
 describe('simulate ensureTxWrapper', () => {
@@ -63,5 +67,56 @@ describe('simulate API-key gating', () => {
     expect(requiresApiKey({ network: 'mainnet' })).toBe(true);
     expect(requiresApiKey({ testnet: true })).toBe(true);
     expect(requiresApiKey({ url: 'https://api.bitbadges.io' })).toBe(true);
+  });
+});
+
+describe('bb simulate error envelopes (BB-296)', () => {
+  const cliTs = path.resolve(__dirname, '../index.ts');
+
+  function runSimulate(args: string[]) {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-simulate-test-'));
+    try {
+      return spawnSync('bun', [cliTs, 'simulate', ...args], {
+        encoding: 'utf-8',
+        timeout: 15_000,
+        env: {
+          PATH: process.env.PATH,
+          HOME: home,
+          BITBADGES_CONFIG_DIR: home,
+          BB_QUIET: '1'
+        }
+      });
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  }
+
+  it('emits missing_api_key JSON envelope on stdout when no API key is configured on mainnet', () => {
+    const res = runSimulate(['{"messages":[{"typeUrl":"/tokenization.MsgCreateCollection","value":{}}]}']);
+    expect(res.status).toBe(2);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.data).toBeNull();
+    expect(env.error.code).toBe('missing_api_key');
+  });
+
+  it('emits invalid_input JSON envelope on stdout for unexpected input shape', () => {
+    const res = runSimulate(['{"foo":"bar"}', '--local']);
+    expect(res.status).toBe(2);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.error.code).toBe('invalid_input');
+    expect(env.error.message).toMatch(/unexpected shape/i);
+  });
+
+  it('emits unsupported_message JSON envelope on stdout for user-level approval messages', () => {
+    const res = runSimulate([
+      '{"typeUrl":"/tokenization.MsgSetOutgoingApproval","value":{"creator":"bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv"}}',
+      '--local'
+    ]);
+    expect(res.status).toBe(2);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.error.code).toBe('unsupported_message');
   });
 });

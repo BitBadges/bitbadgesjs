@@ -208,8 +208,6 @@ tags:
     description: Authentication and authorization endpoints for Sign In with BitBadges
   - name: Transactions
     description: Endpoints for submitting and simulating blockchain transactions
-  - name: Applications
-    description: Endpoints for managing applications (points, tiers, quests)
   - name: Plugins
     description: Endpoints for the plugins for claims
   - name: Dynamic Stores
@@ -285,12 +283,12 @@ paths:
         - in: query
           name: address
           required: false
-          schema: &ref_114
+          schema: &ref_108
             $ref: '#/components/schemas/NativeAddress'
         - in: query
           name: username
           required: false
-          schema: &ref_115
+          schema: &ref_109
             type: string
       security:
         - apiKey: []
@@ -556,7 +554,7 @@ paths:
 
         **Note:** This endpoint fetches balances from the BitBadges standard only. If you need core x/bank or IBC balances (including BitBadges tokens wrapped to x/bank format), please use the [blockchain API](https://lcd.bitbadges.io/#/).
 
-        For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
+        For more advanced queries returning the whole balance document, please use the GET `/collection/{collectionId}/balance/{address}` endpoint (also accepts POST as an alias).
 
         ```tsx
         const res = await BitBadgesApi.getBalanceByAddressSpecificToken(collectionId, address, tokenId);
@@ -747,54 +745,6 @@ paths:
               type: string
             description: The private state instance IDs to fetch. By default, we do not fetch any private states.
             type: array
-      security:
-        - apiKey: []
-      x-internal: false
-  /claims/success/{claimId}/{address}:
-    get:
-      operationId: checkClaimSuccess
-      summary: Check Claim Successes By User
-      description: |
-        Checks if a claim has been successfully completed.
-
-        This returns a success count based on how many times the user has completed the claim.
-
-        For on-demand claims, this will return 1 if the user has completed the claim. For indexed claims, this will return the number of times the user has completed the claim.
-
-        Note that this will not work if the claim hides its state.
-
-        ```tsx
-        const res = await BitBadgesApi.checkClaimSuccess(claimId, address);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCheckClaimSuccessSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#checkclaimsuccess)**
-      tags:
-        - Claims
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iCheckClaimSuccessSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: claimId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: address
-          in: path
-          required: true
-          schema:
-            type: string
       security:
         - apiKey: []
       x-internal: false
@@ -1101,7 +1051,7 @@ paths:
         - in: query
           name: dataSecret
           required: false
-          schema: &ref_102
+          schema: &ref_101
             description: The data secret to fetch. Only needed if you are not signed in as creator. Not applicable to public stores
             type: string
       security:
@@ -1148,19 +1098,19 @@ paths:
         - in: query
           name: key
           required: true
-          schema: &ref_99
+          schema: &ref_98
             description: The key to fetch.
             type: string
         - in: query
           name: dataSecret
           required: false
-          schema: &ref_100
+          schema: &ref_99
             description: The data secret to fetch. Only needed if you are not signed in as creator. Not applicable to public stores
             type: string
         - in: query
           name: lookupType
           required: false
-          schema: &ref_101
+          schema: &ref_100
             enum:
               - id
               - username
@@ -1210,19 +1160,19 @@ paths:
         - in: query
           name: dataSecret
           required: false
-          schema: &ref_96
+          schema: &ref_95
             description: The data secret to fetch. Only needed if you are not signed in as creator. Not applicable to public stores
             type: string
         - in: query
           name: bookmark
           required: false
-          schema: &ref_97
+          schema: &ref_96
             description: The pagination bookmark to start from
             type: string
         - in: query
           name: lookupType
           required: false
-          schema: &ref_98
+          schema: &ref_97
             enum:
               - id
               - username
@@ -1367,44 +1317,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/iDeleteDynamicDataStorePayload'
-      security:
-        - apiKey: []
-      x-internal: false
-  /application/{applicationId}:
-    get:
-      operationId: getApplication
-      summary: Get Application
-      tags:
-        - Applications
-      description: |-
-        Gets an application by specific ID.
-
-        ```tsx
-        await BitBadgesApi.getApplication("application123", { ... });
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getapplication)**
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetApplicationSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: applicationId
-          in: path
-          description: Application ID
-          required: true
-          schema:
-            type: string
       security:
         - apiKey: []
       x-internal: false
@@ -2287,13 +2199,13 @@ paths:
         - in: query
           name: bookmark
           required: false
-          schema: &ref_88
+          schema: &ref_87
             description: The bookmark for pagination.
             type: string
         - in: query
           name: clientId
           required: true
-          schema: &ref_89
+          schema: &ref_88
             description: The client ID to fetch for
             type: string
       security:
@@ -2337,176 +2249,6 @@ paths:
       security:
         - apiKey: []
           userIsManager: []
-  /maps/{mapId}:
-    get:
-      operationId: getMap
-      summary: Get Map
-      tags:
-        - Maps and Protocols
-      description: |-
-        Gets the core details of a map.
-
-        For getting actual values, use the getMapValues endpoint(s).
-
-        ```tsx
-        const res = await BitBadgesApi.getMap(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getmap)**
-      parameters:
-        - name: mapId
-          in: path
-          description: The map ID
-          required: true
-          schema:
-            type: string
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetMapSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
-  /maps:
-    post:
-      operationId: getMaps
-      summary: Get Maps - Batch
-      tags:
-        - Maps and Protocols
-      description: |-
-        Gets map data. Maps are created and stored on-chain. They are key-value objects which can have certain properties
-        like restricting who sets which values, expected formatting, and more.
-
-        For getting actual values, use the getMapValues endpoint.
-
-        ```tsx
-        const res = await BitBadgesApi.getMaps(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapsSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getmaps)**
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetMapsSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
-      parameters: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iGetMapsPayload'
-  /mapValues:
-    post:
-      operationId: getMapValues
-      summary: Get Map Values - Batch
-      tags:
-        - Maps and Protocols
-      description: |-
-        Gets map values for a collection.
-
-        ```tsx
-        const res = await BitBadgesApi.getMapValues(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuesSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getmapvalues)**
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iGetMapValuesPayload'
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetMapValuesSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
-  /mapValue/{mapId}/{key}:
-    get:
-      operationId: getMapValue
-      summary: Get Map Value
-      tags:
-        - Maps and Protocols
-      description: |-
-        Gets a map value.
-
-        ```tsx
-        const res = await BitBadgesApi.getMapValue(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValuePayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetMapValueSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getmapvalue)**
-      parameters:
-        - name: mapId
-          in: path
-          description: The map ID
-          required: true
-          schema:
-            type: string
-        - name: key
-          in: path
-          description: The key to get the value for
-          required: true
-          schema:
-            type: string
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetMapValueSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      security:
-        - apiKey: []
   /claims/search:
     get:
       operationId: searchClaims
@@ -3187,7 +2929,7 @@ paths:
         - in: query
           name: bookmark
           required: false
-          schema: &ref_95
+          schema: &ref_94
             description: The pagination bookmark to start from
             type: string
       security:
@@ -3238,367 +2980,24 @@ paths:
         - in: query
           name: dynamicDataId
           required: true
-          schema: &ref_104
+          schema: &ref_103
             description: The dynamic data ID to fetch activity for
             type: string
         - in: query
           name: bookmark
           required: false
-          schema: &ref_105
+          schema: &ref_104
             description: The pagination bookmark to start from
             type: string
         - in: query
           name: dataSecret
           required: false
-          schema: &ref_106
+          schema: &ref_105
             description: The data secret to fetch activity for. Needed if you are not signed in as creator. Not applicable to public stores
             type: string
       security:
         - apiKey: []
           userSignedIn: []
-      x-internal: false
-  /applications/search:
-    get:
-      operationId: searchApplications
-      summary: Search Applications
-      tags:
-        - Applications
-      description: |-
-        Searches for applications based on the provided criteria. Currently,
-        this only gets the signed in user's applications.
-
-        ```tsx
-        await BitBadgesApi.searchApplications(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iSearchApplicationsSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#searchapplications)**
-
-        Scopes:
-        - `manageApplications` - Required
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iSearchApplicationsSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: bookmark
-          required: false
-          schema: &ref_107
-            description: The search value to search for
-            type: string
-      security:
-        - apiKey: []
-      x-internal: false
-  /applications/fetch:
-    post:
-      operationId: getApplications
-      summary: Get Applications - Batch
-      tags:
-        - Applications
-      description: |-
-        Fetches applications based on the provided criteria.
-
-        ```tsx
-        await BitBadgesApi.getApplications(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetApplicationsSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getapplications)**
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetApplicationsSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-      x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iGetApplicationsPayload'
-  /applications:
-    post:
-      operationId: createApplication
-      summary: Create Application
-      tags:
-        - Applications
-      description: |-
-        Creates an application.
-
-        ```tsx
-        await BitBadgesApi.createApplication(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCreateApplicationSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#createapplication)**
-
-        Scopes:
-        - `manageApplications` - Required
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iCreateApplicationSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-          userIsOwner: []
-      x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iCreateApplicationPayload'
-    put:
-      operationId: updateApplication
-      summary: Update Application
-      tags:
-        - Applications
-      description: |-
-        Updates an application.
-
-        ```tsx
-        await BitBadgesApi.updateApplication(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iUpdateApplicationSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#updateapplication)**
-
-        Scopes:
-        - `manageApplications` - Required
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iUpdateApplicationSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-          userIsOwner: []
-      x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iUpdateApplicationPayload'
-    delete:
-      operationId: deleteApplication
-      summary: Delete Application
-      tags:
-        - Applications
-      description: |-
-        Deletes an application.
-
-        ```tsx
-        await BitBadgesApi.deleteApplication(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iDeleteApplicationSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#deleteapplication)**
-
-        Scopes:
-        - `manageApplications` - Required
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iDeleteApplicationSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-          userIsOwner: []
-      x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iDeleteApplicationPayload'
-  /applications/points:
-    post:
-      operationId: calculatePoints
-      summary: Calculate Points
-      tags:
-        - Applications
-      description: |-
-        Calculates points for an application, page, and user.
-
-        Note: We use a heavy caching system, so you may not see the results immediately and may be rejected if
-        recently calculated.
-
-        ```tsx
-        await BitBadgesApi.calculatePoints(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iCalculatePointsSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#calculatepoints)**
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iCalculatePointsSuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-      security:
-        - apiKey: []
-      x-internal: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/iCalculatePointsPayload'
-  /applications/points/activity:
-    get:
-      operationId: getPointsActivity
-      summary: Get Points Activity
-      tags:
-        - Applications
-      description: |-
-        Fetches points activity for an application.
-
-        ```tsx
-        await BitBadgesApi.getPointsActivity(...);
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivityPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetPointsActivitySuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getpointsactivity)**
-      responses:
-        '200':
-          description: Success response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/iGetPointsActivitySuccessResponse'
-        '400':
-          $ref: '#/components/responses/BadRequestResponse'
-        '500':
-          $ref: '#/components/responses/InternalServerErrorResponse'
-      parameters:
-        - name: x-api-key
-          in: header
-          description: BitBadges API Key for authentication
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: applicationId
-          required: true
-          schema: &ref_108
-            description: The application ID to get points activity for
-            type: string
-        - in: query
-          name: pageId
-          required: true
-          schema: &ref_109
-            description: The page ID to get points activity for
-            type: string
-        - in: query
-          name: bookmark
-          required: false
-          schema: &ref_110
-            description: The pagination bookmark to start from
-            type: string
-        - in: query
-          name: address
-          required: false
-          schema: &ref_111
-            description: The specific address to get points activity for
-            $ref: '#/components/schemas/NativeAddress'
-      security:
-        - apiKey: []
       x-internal: false
   /plugins/fetch:
     post:
@@ -3689,7 +3088,7 @@ paths:
         - in: query
           name: pluginsForSignedInUser
           required: false
-          schema: &ref_90
+          schema: &ref_89
             description: |-
               If true, we will fetch all plugins for the authenticated user (with plugin secrets).
 
@@ -3698,19 +3097,19 @@ paths:
         - in: query
           name: bookmark
           required: false
-          schema: &ref_91
+          schema: &ref_90
             description: Bookmark for pagination of the plugins (obtained from a previous call to this endpoint).
             type: string
         - in: query
           name: searchValue
           required: false
-          schema: &ref_92
+          schema: &ref_91
             description: Search value
             type: string
         - in: query
           name: locale
           required: false
-          schema: &ref_93
+          schema: &ref_92
             description: Locale to restrict results to. By default, we assume 'en'. This is not applicable if you specify createdPluginsOnly, speciifc pluginIds, or an invite code.
             type: string
       security:
@@ -3808,7 +3207,7 @@ paths:
         - in: query
           name: bookmark
           required: false
-          schema: &ref_112
+          schema: &ref_106
             description: The pagination bookmark to start from
             type: string
       security:
@@ -4559,26 +3958,26 @@ paths:
         - in: path
           name: collectionId
           required: true
-          schema: &ref_123
+          schema: &ref_117
             description: The collection ID for the approval.
             $ref: '#/components/schemas/CollectionId'
           description: The collection ID for the approval.
         - in: query
           name: approvalId
           required: true
-          schema: &ref_124
+          schema: &ref_118
             description: The approval ID
             type: string
         - in: query
           name: amountTrackerId
           required: true
-          schema: &ref_125
+          schema: &ref_119
             description: The amount tracker ID of the approval.
             type: string
         - in: query
           name: approvalLevel
           required: true
-          schema: &ref_126
+          schema: &ref_120
             description: The approval level of the approval "collection", "incoming", or "outgoing".
             type: string
             examples: &ref_1
@@ -4588,19 +3987,19 @@ paths:
         - in: query
           name: approverAddress
           required: true
-          schema: &ref_127
+          schema: &ref_121
             description: The address of the approval to check.
             $ref: '#/components/schemas/BitBadgesAddress'
         - in: query
           name: trackerType
           required: true
-          schema: &ref_128
+          schema: &ref_122
             description: The type of tracker to check "overall", "to", "from", or "initiatedBy".
             type: string
         - in: query
           name: approvedAddress
           required: true
-          schema: &ref_129
+          schema: &ref_123
             description: The address to check for the approval.
             $ref: '#/components/schemas/BitBadgesAddress'
       responses:
@@ -4793,60 +4192,171 @@ paths:
       security:
         - apiKey: []
       x-internal: false
-  /api/v0/requestBin/attemptData/{claimId}/{claimAttemptId}:
-    get:
-      operationId: getAttemptDataFromRequestBin
-      summary: Get Attempt Data (Request Bin)
+  /builder/preview:
+    post:
+      operationId: postBuilderPreview
+      summary: Upload a Builder Preview
       tags:
-        - Claims
+        - Builder
       description: |-
-        Gets the attempt data for a specific claim attempt from the requestBin plugin.
+        Upload a built transaction to the indexer and receive a short,
+        shareable code. The `bitbadges-cli preview` command uses this
+        endpoint to hand off a locally-constructed transaction to a reviewer
+        via a `https://bitbadges.io/builder/preview?code=<code>` URL.
 
-        Pre-Req: Your claim must be setup with a "requestBin" plugin. On the site, it will be titled
-        "Collect User Inputs". If there is none, this will fail.
+        The placeholder sidecar (if any) must live inside each message at
+        `transaction.messages[i].value._meta.metadataPlaceholders`. A
+        top-level `metadataPlaceholders` field is rejected with 400 so
+        clients cannot silently drift off the canonical shape.
 
-        ```tsx
-        await BitBadgesApi.getAttemptDataFromRequestBin("claim123", "attempt123", { ... });
-        ```
-
-        SDK Links:
-        - **[Request Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttemptDataFromRequestBinPayload)**
-        - **[Response Type](https://bitbadges.github.io/bitbadgesjs/interfaces/iGetAttemptDataFromRequestBinSuccessResponse)**
-        - **[SDK API Function](https://bitbadges.github.io/bitbadgesjs/classes/BitBadgesAPI.html#getattemptdatafromrequestbin)**
-
-        Scopes:
-          - `readPrivateClaimData` - Required and must be the manager
-      parameters:
-        - name: claimId
-          in: path
-          description: Claim ID
-          required: true
-          schema:
-            type: string
-        - name: claimAttemptId
-          in: path
-          description: Claim attempt ID
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: instanceId
-          required: false
-          schema: &ref_85
-            description: |-
-              The instance ID of the request bin plugin.
-
-              Only needed if there are duplicates. Else, we default to first instance found.
-            type: string
+        **Premium-gated.** Callers without a premium-tier API key receive a
+        402 Payment Required response. Uploads expire after 1 hour.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transaction
+              properties:
+                transaction:
+                  type: object
+                  description: |-
+                    The full transaction object to store. Must have a
+                    non-empty `messages` array. Metadata placeholders, if
+                    any, live inside each message at
+                    `value._meta.metadataPlaceholders` — NOT at the top
+                    level.
+                  required:
+                    - messages
+                  properties:
+                    messages:
+                      type: array
+                      items:
+                        type: object
+                        additionalProperties: true
+                    memo:
+                      type: string
+                    fee:
+                      type: object
+                      additionalProperties: true
+                  additionalProperties: true
+              additionalProperties: false
       responses:
         '200':
-          description: Success response
+          description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/iGetAttemptDataFromRequestBinSuccessResponse'
+                type: object
+                required:
+                  - success
+                  - code
+                  - expiresAt
+                  - expiresIn
+                properties:
+                  success:
+                    type: boolean
+                  code:
+                    type: string
+                    description: |-
+                      The preview code. Format: `prv_<8 lowercase
+                      alphanumeric>`. Use as the `code` query parameter on
+                      `GET /api/{version}/builder/preview` or as the
+                      `?code=` parameter on
+                      `https://bitbadges.io/builder/preview`.
+                  expiresAt:
+                    type: integer
+                    format: int64
+                    description: Expiry time in epoch milliseconds.
+                  expiresIn:
+                    type: string
+                    description: Human-readable TTL (currently `"1 hour"`).
         '400':
           $ref: '#/components/responses/BadRequestResponse'
+        '402':
+          description: Payment Required — premium-tier API key needed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+      security:
+        - apiKey: []
+      x-internal: false
+    get:
+      operationId: getBuilderPreview
+      summary: Fetch a Builder Preview
+      tags:
+        - Builder
+      description: |-
+        Retrieve a previously-uploaded builder preview by code. Used by the
+        frontend `/builder/preview?code=…` page to render a read-only
+        StreamlinedBuilderPreview for a reviewer. Returns 404 if the code
+        has expired (uploads live for 1 hour) and 400 if the code shape is
+        invalid.
+
+        **Premium-gated.** Callers without a premium-tier API key receive a
+        402 Payment Required response.
+      parameters:
+        - in: query
+          name: code
+          required: true
+          schema:
+            type: string
+            description: |-
+              The preview code returned by
+              `POST /api/{version}/builder/preview`. Must match the pattern
+              `prv_[a-z0-9]{8}`.
+            pattern: ^prv_[a-z0-9]{8}$
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - transaction
+                properties:
+                  success:
+                    type: boolean
+                  transaction:
+                    type: object
+                    description: The stored transaction object.
+                    additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '402':
+          description: Payment Required — premium-tier API key needed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '404':
+          description: Preview not found or expired (1 hour TTL).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  message:
+                    type: string
         '500':
           $ref: '#/components/responses/InternalServerErrorResponse'
       security:
@@ -5772,7 +5282,7 @@ components:
           items:
             $ref: '#/components/schemas/UintRange'
           type: array
-          examples: &ref_113
+          examples: &ref_107
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -8559,7 +8069,7 @@ components:
         publicKey:
           description: The public key of the account
           type: string
-          examples: &ref_86
+          examples: &ref_85
             - AksB.... (base64)
         accountNumber:
           description: The account number of the account. This is the account number registered on the BitBadges blockchain.
@@ -8871,7 +8381,7 @@ components:
         listId:
           description: The ID of the address list.
           type: string
-          examples: &ref_122
+          examples: &ref_116
             - customOrReservedListId
             - Mint
             - All
@@ -10654,7 +10164,7 @@ components:
     DynamicDataHandlerActionRequest:
       properties:
         actionName:
-          examples: &ref_103
+          examples: &ref_102
             - add
           $ref: '#/components/schemas/ActionName'
         payload: {}
@@ -10674,7 +10184,7 @@ components:
         handlerId:
           description: The handler ID. Can also be thought of as the type of dynamic data ("addresses", "email", ...)
           type: string
-          examples: &ref_94
+          examples: &ref_93
             - email
             - addresses
         dynamicDataId:
@@ -12831,7 +12341,12 @@ components:
       type: object
     iGetAttemptDataFromRequestBinPayload:
       properties:
-        instanceId: *ref_85
+        instanceId:
+          description: |-
+            The instance ID of the request bin plugin.
+
+            Only needed if there are duplicates. Else, we default to first instance found.
+          type: string
       additionalProperties: false
       type: object
     iGetAttemptDataFromRequestBinSuccessResponse:
@@ -12988,13 +12503,13 @@ components:
         signature:
           description: The signature of the message
           type: string
-          examples: &ref_87
+          examples: &ref_86
             - 0x...
             - 8d42172...
         publicKey:
           description: Required for some chains (Cosmos) to verify signature. The public key of the signer.
           type: string
-          examples: *ref_86
+          examples: *ref_85
       required:
         - message
         - signature
@@ -13726,11 +13241,11 @@ components:
         signature:
           description: The signature of the message
           type: string
-          examples: *ref_87
+          examples: *ref_86
         publicKey:
           description: Required for some chains (Cosmos) to verify signature. The public key of the signer.
           type: string
-          examples: *ref_86
+          examples: *ref_85
         options:
           description: Additional options for verifying the challenge.
           $ref: '#/components/schemas/VerifyChallengeOptions'
@@ -13826,8 +13341,8 @@ components:
       type: object
     iGetSIWBBRequestsForDeveloperAppPayload:
       properties:
-        bookmark: *ref_88
-        clientId: *ref_89
+        bookmark: *ref_87
+        clientId: *ref_88
       required:
         - clientId
       additionalProperties: false
@@ -14542,10 +14057,10 @@ components:
       type: object
     iSearchPluginsPayload:
       properties:
-        pluginsForSignedInUser: *ref_90
-        bookmark: *ref_91
-        searchValue: *ref_92
-        locale: *ref_93
+        pluginsForSignedInUser: *ref_89
+        bookmark: *ref_90
+        searchValue: *ref_91
+        locale: *ref_92
       additionalProperties: false
       type: object
     iGetPluginsPayload:
@@ -14712,7 +14227,7 @@ components:
         handlerId:
           description: The handler ID for the dynamic data store
           type: string
-          examples: *ref_94
+          examples: *ref_93
         label:
           description: The label of the dynamic data store
           type: string
@@ -14734,14 +14249,14 @@ components:
       type: object
     iSearchDynamicDataStoresPayload:
       properties:
-        bookmark: *ref_95
+        bookmark: *ref_94
       additionalProperties: false
       type: object
     iGetDynamicDataStoreValuesPaginatedPayload:
       properties:
-        dataSecret: *ref_96
-        bookmark: *ref_97
-        lookupType: *ref_98
+        dataSecret: *ref_95
+        bookmark: *ref_96
+        lookupType: *ref_97
       additionalProperties: false
       type: object
     iGetDynamicDataStoreValuesPaginatedSuccessResponse:
@@ -14777,9 +14292,9 @@ components:
       type: object
     iGetDynamicDataStoreValuePayload:
       properties:
-        key: *ref_99
-        dataSecret: *ref_100
-        lookupType: *ref_101
+        key: *ref_98
+        dataSecret: *ref_99
+        lookupType: *ref_100
       required:
         - key
       additionalProperties: false
@@ -14802,7 +14317,7 @@ components:
       type: object
     iGetDynamicDataStorePayload:
       properties:
-        dataSecret: *ref_102
+        dataSecret: *ref_101
       additionalProperties: false
       type: object
     iGetDynamicDataStoreSuccessResponse:
@@ -14925,7 +14440,7 @@ components:
         actionName:
           description: The name of the action to perform
           type: string
-          examples: *ref_103
+          examples: *ref_102
         payload:
           description: The payload for this specific action
           $ref: '#/components/schemas/iPerformStoreActionPayload'
@@ -14955,7 +14470,7 @@ components:
               actionName:
                 description: The name of the action to perform
                 type: string
-                examples: *ref_103
+                examples: *ref_102
               payload:
                 $ref: '#/components/schemas/iPerformStoreActionPayload'
                 description: The payload for this specific action
@@ -14985,9 +14500,9 @@ components:
       type: object
     iGetDynamicDataActivityPayload:
       properties:
-        dynamicDataId: *ref_104
-        bookmark: *ref_105
-        dataSecret: *ref_106
+        dynamicDataId: *ref_103
+        bookmark: *ref_104
+        dataSecret: *ref_105
       required:
         - dynamicDataId
       additionalProperties: false
@@ -15001,7 +14516,7 @@ components:
                 type: string
               handlerId:
                 type: string
-                examples: *ref_94
+                examples: *ref_93
               actions:
                 items: {}
                 type: array
@@ -15146,7 +14661,9 @@ components:
       type: object
     iSearchApplicationsPayload:
       properties:
-        bookmark: *ref_107
+        bookmark:
+          description: The search value to search for
+          type: string
       additionalProperties: false
       type: object
     iGetApplicationPayload:
@@ -15341,10 +14858,18 @@ components:
       type: object
     iGetPointsActivityPayload:
       properties:
-        applicationId: *ref_108
-        pageId: *ref_109
-        bookmark: *ref_110
-        address: *ref_111
+        applicationId:
+          description: The application ID to get points activity for
+          type: string
+        pageId:
+          description: The page ID to get points activity for
+          type: string
+        bookmark:
+          description: The pagination bookmark to start from
+          type: string
+        address:
+          description: The specific address to get points activity for
+          $ref: '#/components/schemas/NativeAddress'
       required:
         - applicationId
         - pageId
@@ -15374,7 +14899,7 @@ components:
       type: object
     iSearchUtilityPagesPayload:
       properties:
-        bookmark: *ref_112
+        bookmark: *ref_106
       additionalProperties: false
       type: object
     iGetUtilityPagePayload:
@@ -15797,7 +15322,7 @@ components:
           items:
             $ref: '#/components/schemas/iUintRange'
           type: array
-          examples: *ref_113
+          examples: *ref_107
         mustOwnAmounts:
           $ref: '#/components/schemas/iUintRange'
         additionalCriteria:
@@ -16270,7 +15795,7 @@ components:
         publicKey:
           description: The public key of the account
           type: string
-          examples: *ref_86
+          examples: *ref_85
         accountNumber:
           description: The account number of the account. This is the account number registered on the BitBadges blockchain.
           $ref: '#/components/schemas/NumberType'
@@ -16547,8 +16072,8 @@ components:
       type: object
     iGetAccountPayload:
       properties:
-        address: *ref_114
-        username: *ref_115
+        address: *ref_108
+        username: *ref_109
       additionalProperties: false
       type: object
     iGetAccountSuccessResponse:
@@ -16619,7 +16144,7 @@ components:
         toListId:
           description: The list ID of the to addresses of the approved outgoing transfers.
           type: string
-          examples: &ref_121
+          examples: &ref_115
             - customOrReservedListId
             - Mint
             - All
@@ -16629,7 +16154,7 @@ components:
         initiatedByListId:
           description: The list ID of the initiatedBy addresses of the approved outgoing transfers.
           type: string
-          examples: &ref_116
+          examples: &ref_110
             - customOrReservedListId
             - Mint
             - All
@@ -16641,7 +16166,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved outgoing transfers.
           type: array
-          examples: &ref_117
+          examples: &ref_111
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -16657,7 +16182,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved outgoing transfers.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         approvalId:
           description: The approval ID of the approved outgoing transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId.
           type: string
@@ -16666,7 +16191,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved outgoing transfers.
           type: array
-          examples: &ref_118
+          examples: &ref_112
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -16676,7 +16201,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved outgoing transfers.
           type: array
-          examples: &ref_119
+          examples: &ref_113
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
@@ -16699,7 +16224,7 @@ components:
         fromListId:
           description: The list ID of the from addresses of the approved incoming transfers.
           type: string
-          examples: &ref_120
+          examples: &ref_114
             - customOrReservedListId
             - Mint
             - All
@@ -16709,7 +16234,7 @@ components:
         initiatedByListId:
           description: The list ID of the initiatedBy addresses of the approved incoming transfers.
           type: string
-          examples: *ref_116
+          examples: *ref_110
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -16717,7 +16242,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved incoming transfers.
           type: array
-          examples: *ref_117
+          examples: *ref_111
         tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -16729,7 +16254,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved incoming transfers.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         approvalId:
           description: The approval ID of the approved incoming transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId.
           type: string
@@ -16738,13 +16263,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the approved incoming transfers.
           type: array
-          examples: *ref_118
+          examples: *ref_112
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the approved incoming transfers.
           type: array
-          examples: *ref_119
+          examples: *ref_113
       required:
         - fromListId
         - fromList
@@ -16836,13 +16361,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_118
+          examples: *ref_112
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_119
+          examples: *ref_113
       required:
         - permanentlyPermittedTimes
         - permanentlyForbiddenTimes
@@ -16861,13 +16386,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of the permission.
           type: array
-          examples: *ref_118
+          examples: *ref_112
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of the permission.
           type: array
-          examples: *ref_119
+          examples: *ref_113
       required:
         - tokenIds
         - permanentlyPermittedTimes
@@ -16879,19 +16404,19 @@ components:
         fromListId:
           description: The list ID of the from addresses of the approved transfers.
           type: string
-          examples: *ref_120
+          examples: *ref_114
         fromList:
           $ref: '#/components/schemas/iAddressList'
         toListId:
           description: The list ID of the to addresses of the approved transfers.
           type: string
-          examples: *ref_121
+          examples: *ref_115
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID of the initiatedBy addresses of the approved transfers.
           type: string
-          examples: *ref_116
+          examples: *ref_110
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -16899,7 +16424,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The transfer times of the approved transfers.
           type: array
-          examples: *ref_117
+          examples: *ref_111
         tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -16911,7 +16436,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The owned times of the approved transfers.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         approvalId:
           description: The approval ID of the approved transfers. Can use "All" to represent all IDs, "!approvalId" to represent all IDs except approvalId, or "approvalId" to represent only approvalId.
           type: string
@@ -16920,13 +16445,13 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The permitted times of this permission.
           type: array
-          examples: *ref_118
+          examples: *ref_112
         permanentlyForbiddenTimes:
           items:
             $ref: '#/components/schemas/iUintRange'
           description: The forbidden times of this permission.
           type: array
-          examples: *ref_119
+          examples: *ref_113
       required:
         - fromListId
         - fromList
@@ -17101,7 +16626,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The range of the times that the tokens must be owned.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -17142,7 +16667,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times that the token is owned from.
           type: array
-          examples: *ref_113
+          examples: *ref_107
       required:
         - amount
         - tokenIds
@@ -17154,7 +16679,7 @@ components:
         listId:
           description: The ID of the address list.
           type: string
-          examples: *ref_122
+          examples: *ref_116
         addresses:
           items:
             type: string
@@ -17517,13 +17042,13 @@ components:
       type: string
     iAmountTrackerIdDetails:
       properties:
-        collectionId: *ref_123
-        approvalId: *ref_124
-        amountTrackerId: *ref_125
-        approvalLevel: *ref_126
-        approverAddress: *ref_127
-        trackerType: *ref_128
-        approvedAddress: *ref_129
+        collectionId: *ref_117
+        approvalId: *ref_118
+        amountTrackerId: *ref_119
+        approvalLevel: *ref_120
+        approverAddress: *ref_121
+        trackerType: *ref_122
+        approvedAddress: *ref_123
       required:
         - collectionId
         - approvalId
@@ -17547,7 +17072,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The time ranges during which the user must own the tokens.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -17675,7 +17200,7 @@ components:
         signature:
           description: The Ethereum signature of the nonce.
           type: string
-          examples: *ref_87
+          examples: *ref_86
       required:
         - nonce
         - signature
@@ -17884,13 +17409,13 @@ components:
         toListId:
           description: The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
-          examples: *ref_121
+          examples: *ref_115
         toList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
-          examples: *ref_116
+          examples: *ref_110
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -17898,7 +17423,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times allowed for the transfer transaction.
           type: array
-          examples: *ref_117
+          examples: *ref_111
         tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -17910,7 +17435,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the tokens being transferred.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         approvalId:
           description: The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
           type: string
@@ -18211,13 +17736,13 @@ components:
         fromListId:
           description: The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
-          examples: *ref_120
+          examples: *ref_114
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
-          examples: *ref_116
+          examples: *ref_110
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -18225,7 +17750,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times allowed for the transfer transaction.
           type: array
-          examples: *ref_117
+          examples: *ref_111
         tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -18237,7 +17762,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the tokens being transferred.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         approvalId:
           description: The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
           type: string
@@ -18335,19 +17860,19 @@ components:
         toListId:
           description: The list ID for the user(s) who is receiving the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
-          examples: *ref_121
+          examples: *ref_115
         toList:
           $ref: '#/components/schemas/iAddressList'
         fromListId:
           description: The list ID for the user(s) who is sending the tokens. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
-          examples: *ref_120
+          examples: *ref_114
         fromList:
           $ref: '#/components/schemas/iAddressList'
         initiatedByListId:
           description: The list ID for the user(s) who initiate the transfer. The ID is either registered on-chain for reusability or follows the reserved ID system.
           type: string
-          examples: *ref_116
+          examples: *ref_110
         initiatedByList:
           $ref: '#/components/schemas/iAddressList'
         transferTimes:
@@ -18355,7 +17880,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The times allowed for the transfer transaction.
           type: array
-          examples: *ref_117
+          examples: *ref_111
         tokenIds:
           items:
             $ref: '#/components/schemas/iUintRange'
@@ -18367,7 +17892,7 @@ components:
             $ref: '#/components/schemas/iUintRange'
           description: The ownership times of the tokens being transferred.
           type: array
-          examples: *ref_113
+          examples: *ref_107
         approvalId:
           description: The ID of the approval. Must not be a duplicate of another approval ID in the same timeline.
           type: string
@@ -18504,23 +18029,23 @@ components:
         tokenIds:
           examples: *ref_63
         timelineTimes:
-          examples: &ref_130
+          examples: &ref_124
             - - start: '1713301889'
                 end: '2000000000'
             - - start: '1'
                 end: '18446744073709551615'
         transferTimes:
-          examples: *ref_117
+          examples: *ref_111
         ownershipTimes:
-          examples: *ref_113
+          examples: *ref_107
         toList: {}
         fromList: {}
         initiatedByList: {}
         approvalIdList: {}
         permanentlyPermittedTimes:
-          examples: *ref_118
+          examples: *ref_112
         permanentlyForbiddenTimes:
-          examples: *ref_119
+          examples: *ref_113
         usesTokenIds:
           type: boolean
         usesTimelineTimes:
@@ -18575,9 +18100,9 @@ components:
         initiatedByList: {}
         approvalIdList: {}
         permanentlyPermittedTimes:
-          examples: *ref_118
+          examples: *ref_112
         permanentlyForbiddenTimes:
-          examples: *ref_119
+          examples: *ref_113
         arbitraryValue: {}
       required:
         - tokenId
@@ -18647,19 +18172,19 @@ components:
         tokenIds:
           examples: *ref_63
         timelineTimes:
-          examples: *ref_130
+          examples: *ref_124
         transferTimes:
-          examples: *ref_117
+          examples: *ref_111
         ownershipTimes:
-          examples: *ref_113
+          examples: *ref_107
         toList: {}
         fromList: {}
         initiatedByList: {}
         approvalIdList: {}
         permanentlyPermittedTimes:
-          examples: *ref_118
+          examples: *ref_112
         permanentlyForbiddenTimes:
-          examples: *ref_119
+          examples: *ref_113
         arbitraryValue: {}
       required:
         - tokenIds
@@ -19084,7 +18609,7 @@ components:
               type: number
             publicKey:
               type: string
-              examples: *ref_86
+              examples: *ref_85
           required:
             - address
             - sequence

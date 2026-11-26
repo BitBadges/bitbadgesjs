@@ -961,4 +961,71 @@ describe('validateTransaction', () => {
     });
     expect(result.valid).toBe(true);
   });
+
+  it('rejects clearly invalid creator addresses as errors while preserving valid 0x warning and Mint (BB-312)', () => {
+    const bogus = validateTransaction({
+      messages: [
+        {
+          typeUrl: '/tokenization.MsgCreateCollection',
+          value: { creator: 'notanaddress' }
+        }
+      ]
+    });
+    expect(bogus.valid).toBe(false);
+    expect(bogus.issues.some((i) => i.severity === 'error' && i.path === 'messages[0].value.creator')).toBe(true);
+
+    const ethCreator = validateTransaction({
+      messages: [
+        {
+          typeUrl: '/tokenization.MsgTransferTokens',
+          value: { creator: '0x0000000000000000000000000000000000000000', transfers: [{ prioritizedApprovals: [] }] }
+        }
+      ]
+    });
+    expect(ethCreator.valid).toBe(true);
+    expect(ethCreator.issues.some((i) => i.severity === 'warning' && i.path === 'messages[0].value.creator')).toBe(true);
+
+    const mintCreator = validateTransaction({
+      messages: [
+        {
+          typeUrl: '/tokenization.MsgTransferTokens',
+          value: { creator: 'Mint', transfers: [{ prioritizedApprovals: [] }] }
+        }
+      ]
+    });
+    expect(mintCreator.valid).toBe(true);
+  });
+
+  it('deduplicates numeric UintRange start/end errors in validateTransaction (BB-313)', () => {
+    const result = validateTransaction({
+      messages: [
+        {
+          typeUrl: '/tokenization.MsgCreateCollection',
+          value: {
+            creator: 'bb1abc',
+            validTokenIds: [{ start: 1, end: 10 }]
+          }
+        }
+      ]
+    });
+    expect(result.valid).toBe(false);
+    const startIssues = result.issues.filter((i) => i.path?.endsWith('validTokenIds[0].start'));
+    const endIssues = result.issues.filter((i) => i.path?.endsWith('validTokenIds[0].end'));
+    expect(startIssues).toHaveLength(1);
+    expect(endIssues).toHaveLength(1);
+
+    // Non-number invalid type (boolean) is still caught by UintRange validation
+    const boolResult = validateTransaction({
+      messages: [
+        {
+          typeUrl: '/tokenization.MsgCreateCollection',
+          value: {
+            creator: 'bb1abc',
+            validTokenIds: [{ start: true, end: '10' }]
+          }
+        }
+      ]
+    });
+    expect(boolResult.issues.some((i) => i.message.includes('UintRange "start" must be a string'))).toBe(true);
+  });
 });

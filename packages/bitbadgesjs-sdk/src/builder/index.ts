@@ -19,10 +19,51 @@
  * - Subscriptions
  */
 
+import { realpathSync } from 'node:fs';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createServer } from './server.js';
+import { createServer, getBuilderPackageVersion } from './server.js';
+import { MCP_TOOLSET_NAMES } from './tools/registry.js';
+
+export function formatBuilderHelp(version: string = getBuilderPackageVersion()): string {
+  return [
+    `bitbadges-builder v${version} — BitBadges Builder MCP stdio server`,
+    '',
+    'Usage:',
+    '  bitbadges-builder            Start the MCP server over stdio',
+    '  bitbadges-builder --version  Print package version and exit',
+    '  bitbadges-builder --help     Show this help message and exit',
+    '',
+    'Options:',
+    '  -v, --version                Print package version and exit',
+    '  -h, --help                   Show this help message and exit',
+    '',
+    'Environment Variables:',
+    `  BITBADGES_MCP_TOOLSETS       Optional comma-separated toolset filter for tools/list`,
+    `                               (default: unset = all tools). Available toolsets:`,
+    `                               ${MCP_TOOLSET_NAMES.join(', ')}`,
+    '  BITBADGES_API_KEY            API key for query / simulation tools',
+    '  BITBADGES_API_URL            Optional custom indexer API base URL',
+    ''
+  ].join('\n');
+}
+
+export function handleBuilderCliArgs(args: readonly string[], entryFile?: string): { exit: boolean; stdout?: string } {
+  if (args.includes('--version') || args.includes('-v')) {
+    return { exit: true, stdout: getBuilderPackageVersion(entryFile) + '\n' };
+  }
+  if (args.includes('--help') || args.includes('-h')) {
+    return { exit: true, stdout: formatBuilderHelp(getBuilderPackageVersion(entryFile)) };
+  }
+  return { exit: false };
+}
 
 async function main() {
+  const handled = handleBuilderCliArgs(process.argv.slice(2), process.argv[1]);
+  if (handled.exit) {
+    if (handled.stdout) process.stdout.write(handled.stdout);
+    process.exit(0);
+  }
+
   const server = createServer();
   const transport = new StdioServerTransport();
 
@@ -40,7 +81,27 @@ async function main() {
   });
 }
 
-main().catch((error) => {
-  console.error('Fatal error:', error);
-  process.exit(1);
-});
+// Only start the stdio server when executed directly as the bin entry point
+// (not when imported in unit tests or library code).
+const isDirectExecution = (() => {
+  if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
+    return true;
+  }
+  if (typeof process === 'undefined' || !Array.isArray(process.argv) || typeof process.argv[1] !== 'string') {
+    return false;
+  }
+  let resolved = process.argv[1];
+  try {
+    resolved = realpathSync(resolved);
+  } catch {
+    // Keep original argv[1] if realpath fails.
+  }
+  return /(?:^|[\\/])builder[\\/]index\.(?:[cm]?js|ts)$|(?:^|[\\/])bitbadges-builder$/.test(resolved);
+})();
+
+if (isDirectExecution) {
+  main().catch((error) => {
+    console.error('Fatal error:', error);
+    process.exit(1);
+  });
+}

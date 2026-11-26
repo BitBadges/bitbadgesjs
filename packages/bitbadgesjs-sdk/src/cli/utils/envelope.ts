@@ -179,6 +179,28 @@ interface ApiErrorShape {
   response?: unknown;
   hint?: string;
   code?: string;
+  issues?: Array<{ path?: Array<string | number>; message?: string; code?: string; expected?: string; received?: string }>;
+}
+
+/**
+ * Format a ZodError's issues into a concise, human-readable CLI message
+ * with `--flag` hints instead of dumping raw `JSON.stringify(zodIssues)`.
+ */
+export function formatZodErrorMessage(
+  issues: Array<{ path?: Array<string | number>; message?: string; code?: string; expected?: string; received?: string }>
+): string {
+  const parts = issues.map((issue) => {
+    const field = Array.isArray(issue.path) && issue.path.length > 0 ? issue.path.join('.') : '';
+    const flag = field ? `--${field.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase()).replace(/\./g, '-')}` : '';
+    if (issue.code === 'invalid_type' && issue.received === 'undefined' && field) {
+      return `missing required ${flag} (${field})`;
+    }
+    if (issue.code === 'invalid_type' && issue.received === 'nan' && field) {
+      return `invalid numeric value for ${flag} (${field}): ${issue.message ?? 'Expected a finite number'}`;
+    }
+    return field ? `${flag} (${field}): ${issue.message ?? 'Invalid value'}` : (issue.message ?? 'Invalid input');
+  });
+  return `Invalid input: ${parts.join('; ')}`;
 }
 
 /**
@@ -196,7 +218,11 @@ export function emitError(
   opts: EmitOptions & { exitCode?: number; code?: string | BBErrorCodeValue } = {}
 ): never {
   const e = err as ApiErrorShape;
+  const isZodError = Array.isArray(e?.issues) && e.issues.length > 0 && typeof e.issues[0]?.message === 'string';
   const message = (() => {
+    if (isZodError) {
+      return formatZodErrorMessage(e.issues!);
+    }
     if (e?.response !== undefined) {
       if (typeof e.response === 'string') return e.response;
       try {
@@ -207,11 +233,12 @@ export function emitError(
     }
     return e?.message ?? String(err);
   })();
-  const code = opts.code ?? e?.code ?? BBErrorCode.CLI_ERROR;
+  const code = opts.code ?? e?.code ?? (isZodError ? BBErrorCode.INVALID_INPUT : BBErrorCode.CLI_ERROR);
+  const details = opts.meta ?? (isZodError ? { issues: e.issues } : e?.response);
   // `opts.hint` is the caller's next-step advice and is what an agent uses to
   // recover. It was being dropped: only the error object's own hint was read,
   // so every `emitError(err, { hint })` call site silently lost it.
-  const env = errorEnvelope(code, message, opts.meta ?? e?.response, opts.hint ?? e?.hint);
+  const env = errorEnvelope(code, message, details, opts.hint ?? e?.hint);
   const text = opts.condensed
     ? JSON.stringify(env, bigIntReplacer)
     : JSON.stringify(env, bigIntReplacer, 2);

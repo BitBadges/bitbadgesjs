@@ -8,7 +8,11 @@
  * below catches a friction point that smoke surfaced.
  */
 
-import { buildCommand } from './build.js';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { buildCommand, validateCreatorFlag, parseNumericFlag } from './build.js';
 import { buildProductCatalog } from '../../core/builders/product-catalog.js';
 
 describe('buildCommand shape', () => {
@@ -169,5 +173,149 @@ describe('product-catalog metadata fallback', () => {
     expect(parsed.name).toBe('Mug');
     expect(parsed.image).toBe('ipfs://mug.png');
     expect(parsed.description).toBe('Coffee mug');
+  });
+});
+
+describe('build CLI agent ergonomics (BB-312)', () => {
+  const cliTs = path.resolve(__dirname, '../index.ts');
+  const validBb1 = 'bb1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqs7gvmv';
+  const validEth = '0x0000000000000000000000000000000000000000';
+
+  function runCliTs(args: string[]) {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-build-ergo-'));
+    try {
+      return spawnSync('bun', [cliTs, ...args], {
+        encoding: 'utf-8',
+        timeout: 15_000,
+        env: {
+          PATH: process.env.PATH,
+          HOME: home,
+          BITBADGES_CONFIG_DIR: home,
+          BB_QUIET: '1'
+        }
+      });
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  }
+
+  it('validateCreatorFlag accepts valid bb1, 0x (normalized), and Mint while rejecting garbage', () => {
+    expect(validateCreatorFlag(undefined)).toBeUndefined();
+    expect(validateCreatorFlag('Mint')).toBe('Mint');
+    expect(validateCreatorFlag(validBb1)).toBe(validBb1);
+    expect(validateCreatorFlag(validEth)).toBe(validBb1);
+    expect(() => validateCreatorFlag('notanaddress')).toThrow(/Invalid --creator/);
+    expect(() => validateCreatorFlag('bb1broken')).toThrow(/Invalid --creator/);
+  });
+
+  it('parseNumericFlag rejects non-numeric and missing required values with invalid_input', () => {
+    expect(parseNumericFlag('10', '--price', { required: true })).toBe(10);
+    expect(parseNumericFlag(undefined, '--limit')).toBeUndefined();
+    expect(() => parseNumericFlag(undefined, '--price', { required: true })).toThrow(/--price/);
+    expect(() => parseNumericFlag('abc', '--price', { required: true })).toThrow(/Invalid numeric value "abc" for --price/);
+  });
+
+  it('bb build rejects --creator notanaddress with invalid_address envelope', () => {
+    const res = runCliTs([
+      'build',
+      'vault',
+      '--backing-coin',
+      'USDC',
+      '--uri',
+      'ipfs://meta',
+      '--creator',
+      'notanaddress'
+    ]);
+    expect(res.status).not.toBe(0);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.error.code).toBe('invalid_address');
+    expect(env.error.message).toMatch(/--creator/);
+  });
+
+  it('bb build subscription without --price emits clean invalid_input message (not raw Zod JSON)', () => {
+    const res = runCliTs(['build', 'subscription', '--interval', 'monthly']);
+    expect(res.status).not.toBe(0);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.error.code).toBe('invalid_input');
+    expect(env.error.message).toMatch(/--price/);
+    expect(env.error.message).not.toMatch(/^\s*\[/);
+  });
+
+  it('bb build subscription with --price abc emits clean invalid_input message', () => {
+    const res = runCliTs([
+      'build',
+      'subscription',
+      '--interval',
+      'monthly',
+      '--price',
+      'abc',
+      '--denom',
+      'USDC',
+      '--recipient',
+      validBb1,
+      '--uri',
+      'ipfs://meta'
+    ]);
+    expect(res.status).not.toBe(0);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.error.code).toBe('invalid_input');
+    expect(env.error.message).toMatch(/--price/);
+  });
+
+  it('bb build --output-file writes the full envelope to disk AND emits a receipt envelope on stdout', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bb-outfile-'));
+    const outPath = path.join(dir, 'tx.json');
+    try {
+      const res = runCliTs([
+        'build',
+        'vault',
+        '--backing-coin',
+        'USDC',
+        '--uri',
+        'ipfs://meta',
+        '--creator',
+        validBb1,
+        '--output-file',
+        outPath
+      ]);
+      expect(res.status).toBe(0);
+      const stdoutEnv = JSON.parse(res.stdout);
+      expect(stdoutEnv.ok).toBe(true);
+      expect(stdoutEnv.data.outputFile).toBe(outPath);
+      expect(stdoutEnv.data.typeUrl).toBe('/tokenization.MsgCreateCollection');
+
+      const fileEnv = JSON.parse(fs.readFileSync(outPath, 'utf-8'));
+      expect(fileEnv.ok).toBe(true);
+      expect(fileEnv.data.typeUrl).toBe('/tokenization.MsgCreateCollection');
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('bb check reports malformed JSON with a single Accepts hint and no double period', () => {
+    const res = runCliTs(['check', '{not json']);
+    expect(res.status).toBe(2);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.error.code).toBe('invalid_input');
+    expect((env.error.message.match(/Accepts:/g) ?? []).length).toBe(1);
+    expect(env.error.message).not.toContain('..');
+  });
+
+  it('bb check rejects invalid creator address as an error (validation_failed)', () => {
+    const res = runCliTs([
+      'check',
+      JSON.stringify({
+        typeUrl: '/tokenization.MsgCreateCollection',
+        value: { creator: 'notanaddress', validTokenIds: [{ start: '1', end: '1' }] }
+      })
+    ]);
+    expect(res.status).toBe(2);
+    const env = JSON.parse(res.stdout);
+    expect(env.ok).toBe(false);
+    expect(env.error.code).toBe('validation_failed');
   });
 });

@@ -2,6 +2,7 @@ import type { NumberType } from '@/common/string-numbers.js';
 import { BitBadgesCollection, GetCollectionsSuccessResponse, iGetCollectionsPayload } from './BitBadgesCollection.js';
 
 import type { CollectionId, iAmountTrackerIdDetails } from '@/interfaces/index.js';
+import type { BalanceDocWithDetails } from './docs-types/docs.js';
 import type { iEstimateSwapPayload, iEstimateSwapSuccessResponse } from '@/gamm/indexer.js';
 import typia from 'typia';
 import type { GetAccountSuccessResponse, GetAccountsSuccessResponse, iGetAccountPayload, iGetAccountsPayload } from './BitBadgesUserInfo.js';
@@ -469,10 +470,10 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
   }
 
   /**
-   * Gets the balance of a specific token for a specific address
+   * Gets the balance document for a specific address in a collection
    *
    * @remarks
-   * - **API Route**: `POST /api/v0/collection/:collectionId/balance/:address`
+   * - **API Route**: `GET /api/v0/collection/:collectionId/balance/:address` (also accepts `POST` as an alias)
    * - **SDK Function Call**: `await BitBadgesApi.getBalanceByAddress(collectionId, address);`
    *
    * @example
@@ -1569,7 +1570,22 @@ export class BitBadgesAPI<T extends NumberType> extends BaseBitBadgesApi<T> {
    * console.log(res);
    * ```
    * */
-  public async getTokensViewForUser(address: NativeAddress, payload: iGetTokensViewForUserPayload): Promise<GetTokensViewForUserSuccessResponse<T>> {
+  public async getTokensViewForUser(
+    address: NativeAddress,
+    payload: iGetTokensViewForUserPayload & { viewType: 'created' | 'managing' }
+  ): Promise<GetTokensViewForUserSuccessResponse<T, string>>;
+  public async getTokensViewForUser(
+    address: NativeAddress,
+    payload: iGetTokensViewForUserPayload & { viewType?: 'collected' }
+  ): Promise<GetTokensViewForUserSuccessResponse<T, BalanceDocWithDetails<T>>>;
+  public async getTokensViewForUser(
+    address: NativeAddress,
+    payload: iGetTokensViewForUserPayload
+  ): Promise<GetTokensViewForUserSuccessResponse<T>>;
+  public async getTokensViewForUser(
+    address: NativeAddress,
+    payload: iGetTokensViewForUserPayload
+  ): Promise<GetTokensViewForUserSuccessResponse<T, any>> {
     try {
       const validateRes: typia.IValidation<iGetTokensViewForUserPayload> = typia.validate<iGetTokensViewForUserPayload>(payload);
       if (!validateRes.success) {

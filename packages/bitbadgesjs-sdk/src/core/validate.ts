@@ -1171,6 +1171,41 @@ export function validateMsgConstructorFields(value: Record<string, unknown>, bas
   }
 }
 
+/**
+ * Validate a message `creator` field.
+ *
+ * Accepts `bb1...` addresses (including short unit-test placeholders like `bb1abc`)
+ * and `"Mint"`. A well-formed 42-char `0x...` Ethereum address emits a warning
+ * recommending canonical `bb1...` form. Clearly invalid values (e.g. `"notanaddress"`,
+ * `"0x1234"`) are rejected as errors.
+ */
+function validateCreatorAddress(creator: unknown, msgLabel: string, path: string, issues: ValidationIssue[]): void {
+  if (!creator || typeof creator !== 'string' || creator.trim() === '') {
+    issues.push({
+      severity: 'error',
+      message: `${msgLabel} missing "creator" field`,
+      path
+    });
+    return;
+  }
+  if (creator === 'Mint' || creator.startsWith('bb1')) {
+    return;
+  }
+  if (/^0x[0-9a-fA-F]{40}$/.test(creator)) {
+    issues.push({
+      severity: 'warning',
+      message: 'Creator address should start with "bb1" (convert 0x address to bb1 before signing)',
+      path
+    });
+    return;
+  }
+  issues.push({
+    severity: 'error',
+    message: `Invalid creator address "${creator}". Creator address should start with "bb1" (or be a valid 0x address).`,
+    path
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Main orchestrator
 // ---------------------------------------------------------------------------
@@ -1218,8 +1253,17 @@ export function validateTransaction(txBody: any): ValidationResult {
   // Check all numbers are strings
   checkNumbersAreStrings(txBody, '', issues);
 
-  // Check UintRange formats
-  findAndValidateUintRanges(txBody, '', issues);
+  // Check UintRange formats, deduplicating number-where-string-expected errors
+  // already reported for the exact same UintRange `start`/`end` path.
+  const numberIssuePaths = new Set(issues.map((i) => i.path).filter((p): p is string => Boolean(p)));
+  const uintRangeIssues: ValidationIssue[] = [];
+  findAndValidateUintRanges(txBody, '', uintRangeIssues);
+  for (const issue of uintRangeIssues) {
+    if (issue.path && numberIssuePaths.has(issue.path) && /must be a string, got number/.test(issue.message)) {
+      continue;
+    }
+    issues.push(issue);
+  }
 
   // Validate each message
   (transaction.messages as unknown[]).forEach((msg, msgIndex) => {
@@ -1330,19 +1374,7 @@ export function validateTransaction(txBody: any): ValidationResult {
       // --- Specific validation rules ---
 
       // Check creator
-      if (!value.creator || typeof value.creator !== 'string') {
-        issues.push({
-          severity: 'error',
-          message: 'Collection message missing "creator" field',
-          path: `${msgPath}.value.creator`
-        });
-      } else if (!(value.creator as string).startsWith('bb1')) {
-        issues.push({
-          severity: 'warning',
-          message: 'Creator address should start with "bb1"',
-          path: `${msgPath}.value.creator`
-        });
-      }
+      validateCreatorAddress(value.creator, 'Collection message', `${msgPath}.value.creator`, issues);
 
       // Check collectionId — required on Update/Universal, must be absent
       // (or "0") on Create per proto. We only flag the Update case.
@@ -1521,19 +1553,7 @@ export function validateTransaction(txBody: any): ValidationResult {
       message.typeUrl === '/tokenization.MsgDeleteOutgoingApproval' ||
       message.typeUrl === '/tokenization.MsgPurgeApprovals';
     if (_isUserApprovalMsg) {
-      if (!value.creator || typeof value.creator !== 'string') {
-        issues.push({
-          severity: 'error',
-          message: `${message.typeUrl} missing "creator" field`,
-          path: `${msgPath}.value.creator`
-        });
-      } else if (!(value.creator as string).startsWith('bb1')) {
-        issues.push({
-          severity: 'warning',
-          message: 'Creator address should start with "bb1"',
-          path: `${msgPath}.value.creator`
-        });
-      }
+      validateCreatorAddress(value.creator, String(message.typeUrl), `${msgPath}.value.creator`, issues);
       // collectionId is required & non-zero on every user-level approval msg.
       if (!('collectionId' in value) || value.collectionId === '0' || value.collectionId === 0) {
         issues.push({
@@ -1605,13 +1625,7 @@ export function validateTransaction(txBody: any): ValidationResult {
     // Validate MsgTransferTokens
     if (message.typeUrl === '/tokenization.MsgTransferTokens') {
       // Check creator
-      if (!value.creator || typeof value.creator !== 'string') {
-        issues.push({
-          severity: 'error',
-          message: 'MsgTransferTokens missing "creator" field',
-          path: `${msgPath}.value.creator`
-        });
-      }
+      validateCreatorAddress(value.creator, 'MsgTransferTokens', `${msgPath}.value.creator`, issues);
 
       // Check transfers array
       if (!Array.isArray(value.transfers)) {

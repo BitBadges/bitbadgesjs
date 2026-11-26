@@ -551,7 +551,7 @@ paths:
 
         **Note:** This endpoint fetches balances from the BitBadges standard only. If you need core x/bank or IBC balances (including BitBadges tokens wrapped to x/bank format), please use the [blockchain API](https://lcd.bitbadges.io/#/).
 
-        For more advanced queries returning the whole balance document, please use the POST `/collection/{collectionId}/balance/{address}` endpoint.
+        For more advanced queries returning the whole balance document, please use the GET `/collection/{collectionId}/balance/{address}` endpoint (also accepts POST as an alias).
 
         ```tsx
         const res = await BitBadgesApi.getBalanceByAddressSpecificToken(collectionId, address, tokenId);

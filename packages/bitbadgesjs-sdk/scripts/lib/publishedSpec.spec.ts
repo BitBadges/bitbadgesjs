@@ -18,8 +18,6 @@ const publishedArtifacts: [string, () => any][] = [
 
 const HTTP_METHODS = new Set(['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace']);
 const TEMPLATE = /\{([^}]+)\}/g;
-/** BB-298 tracks this leftover `/api/v0` prefix; do not expand the allowlist. */
-const API_PREFIX_ALLOWLIST = ['/api/v0/requestBin/attemptData/{claimId}/{claimAttemptId}'];
 
 type PathParam = { name?: string; in?: string };
 type PathItem = Record<string, unknown> & { parameters?: PathParam[] };
@@ -60,7 +58,32 @@ describe('published OpenAPI artifacts', () => {
       const published = load();
       expect(published.servers[0].url).toMatch(/\/api\/v0$/);
       const prefixed = Object.keys(published.paths ?? {}).filter((route) => route.startsWith('/api/'));
-      expect(prefixed).toEqual(API_PREFIX_ALLOWLIST);
+      expect(prefixed).toEqual([]);
+    });
+
+    it('omits removed Applications, Maps, requestBin, and /claims/success endpoints (BB-298)', () => {
+      const published = load();
+      const paths = published.paths ?? {};
+      const removedPaths = [
+        '/claims/success/{claimId}/{address}',
+        '/application/{applicationId}',
+        '/applications',
+        '/applications/search',
+        '/applications/fetch',
+        '/applications/points',
+        '/applications/points/activity',
+        '/maps',
+        '/maps/{mapId}',
+        '/mapValues',
+        '/mapValue/{mapId}/{key}',
+        '/api/v0/requestBin/attemptData/{claimId}/{claimAttemptId}'
+      ];
+      for (const route of removedPaths) {
+        expect(paths[route]).toBeUndefined();
+      }
+      const tagNames = (published.tags ?? []).map((t: { name: string }) => t.name);
+      expect(tagNames).not.toContain('Applications');
+      expect(tagNames).not.toContain('Maps and Protocols');
     });
 
     it('every {param} in a path has a matching in: path parameter', () => {
