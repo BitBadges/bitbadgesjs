@@ -94,4 +94,144 @@ describe('independent browser completion receipts', () => {
     const receipt = await verifyBrowserReceipt(bound, result, { fetch: rpc(data) as any });
     expect(receipt.status).toBe('confirmed'); expect(receipt.createdCollectionIds).toEqual(['7']);
   });
+
+  describe('opt-in verified-complete telemetry (BB-292)', () => {
+    it('sends nothing by default when receipt verification confirms completion', async () => {
+      const calls: { url: string; method?: string; body?: unknown }[] = [];
+      const fetcher = jest.fn(async (url: any, opts: any = {}) => {
+        calls.push({ url: String(url), method: opts.method, body: opts.body });
+        if (String(url).endsWith('/api/v0/status')) {
+          return new Response(JSON.stringify({ indexing: { version: 1, network: request.network, chainId: request.chainId, evmChainId: request.evmChainId, completedThroughHeight: '1' } }));
+        }
+        return rpc(chainResponse())(url);
+      });
+      const receipt = await verifyBrowserReceipt(request, result, { fetch: fetcher as any, indexerUrl: 'http://indexer.invalid', env: {}, nav: {} });
+      expect(receipt.status).toBe('indexed');
+      expect(calls.some((c) => c.url.includes('/telemetry/handoff'))).toBe(false);
+    });
+
+    it('sends nothing when opted out or when DO_NOT_TRACK / DNT / GPC is set', async () => {
+      for (const override of [
+        { telemetry: false, env: { BITBADGES_HANDOFF_TELEMETRY: '1' }, nav: {} },
+        { telemetry: true, env: { DO_NOT_TRACK: '1' }, nav: {} },
+        { telemetry: true, env: { DNT: '1' }, nav: {} },
+        { telemetry: true, env: { GPC: '1' }, nav: {} },
+        { telemetry: true, env: {}, nav: { doNotTrack: '1' } },
+        { telemetry: true, env: {}, nav: { globalPrivacyControl: true } }
+      ]) {
+        const calls: string[] = [];
+        const fetcher = jest.fn(async (url: any) => {
+          calls.push(String(url));
+          return rpc(chainResponse())(url);
+        });
+        const receipt = await verifyBrowserReceipt(request, result, {
+          fetch: fetcher as any,
+          indexerUrl: 'http://indexer.invalid',
+          checkIndexer: false,
+          ...override
+        });
+        expect(receipt.confirmed).toBe(true);
+        expect(calls.some((u) => u.includes('/telemetry/handoff'))).toBe(false);
+      }
+    });
+
+    it('emits exactly one allowlisted verified-complete POST when opted in, with zero sensitive data', async () => {
+      const telemetryPosts: { url: string; body: string; headers: Record<string, string> }[] = [];
+      const fetcher = jest.fn(async (url: any, opts: any = {}) => {
+        const target = String(url);
+        if (target.endsWith('/api/v0/telemetry/handoff')) {
+          telemetryPosts.push({ url: target, body: String(opts.body), headers: (opts.headers ?? {}) as Record<string, string> });
+          return new Response(null, { status: 204 });
+        }
+        if (target.endsWith('/api/v0/status')) {
+          return new Response(JSON.stringify({ indexing: { version: 1, network: request.network, chainId: request.chainId, evmChainId: request.evmChainId, completedThroughHeight: '1' } }));
+        }
+        return rpc(chainResponse())(url);
+      });
+      const startedAt = 1_700_000_000_000;
+      const receipt = await verifyBrowserReceipt(request, result, {
+        fetch: fetcher as any,
+        indexerUrl: 'http://indexer.invalid',
+        apiKey: 'fixture-key',
+        env: { BITBADGES_HANDOFF_TELEMETRY: '1' },
+        nav: {},
+        handoffStartedAt: startedAt,
+        now: () => startedAt + 45_000,
+        telemetryRecoveries: 1
+      });
+      expect(receipt.status).toBe('indexed');
+      expect(telemetryPosts).toHaveLength(1);
+      expect(telemetryPosts[0].url).toBe('http://indexer.invalid/api/v0/telemetry/handoff');
+      expect(telemetryPosts[0].headers['x-api-key']).toBe('fixture-key');
+      const raw = telemetryPosts[0].body;
+      const parsed = JSON.parse(raw);
+      expect(Object.keys(parsed).sort()).toEqual(['durationBucket', 'event', 'flow', 'recoveries']);
+      expect(parsed).toEqual({
+        event: 'verified-complete',
+        flow: 'tx-cosmos',
+        durationBucket: 'lt2m',
+        recoveries: 1
+      });
+      // Assert zero sensitive fields or substrings leak into the serialized payload
+      expect(raw).not.toContain(address);
+      expect(raw).not.toContain(hash);
+      expect(raw).not.toContain(request.requestId);
+      expect(raw).not.toContain('MsgSend');
+      expect(raw).not.toContain('http://');
+      expect(raw).not.toContain('https://');
+      expect(raw).not.toContain('?');
+      expect(raw).not.toContain('fixture-key');
+    });
+
+    it('emits tx-evm flow for EVM confirmations and never emits for unconfirmed/failed receipts', async () => {
+      const telemetryBodies: any[] = [];
+      const evm: BrowserTxRequestV2 = { version: 2, requestId: request.requestId, expectedAddress: address, network: 'local', chain: 'evm', chainId: request.evmChainId, evmChainId: request.evmChainId, expiresAt: request.expiresAt, signOnly: false, tx: { to: '0x' + '22'.repeat(20), value: '1', data: '0x1234' } };
+      const callback = { ...result, chain: 'evm', chainId: evm.chainId, hash: '0x' + hash };
+      const transaction = { hash: '0x' + hash, from: '0x' + '11'.repeat(20), to: evm.tx.to, value: '0x1', input: '0x1234' };
+      const fetcher = jest.fn(async (url: any, opts: any = {}) => {
+        if (String(url).endsWith('/api/v0/telemetry/handoff')) {
+          telemetryBodies.push(JSON.parse(String(opts.body)));
+          return new Response(null, { status: 204 });
+        }
+        if (!opts.body) return new Response(JSON.stringify({ indexing: { version: 1, network: 'local', chainId: request.chainId, evmChainId: request.evmChainId, completedThroughHeight: '1' } }));
+        const method = JSON.parse(opts.body).method;
+        const res = method === 'eth_chainId' ? '0x' + BigInt(evm.evmChainId).toString(16) : method === 'eth_getTransactionByHash' ? transaction : { transactionHash: '0x' + hash, status: '0x1', blockNumber: '0x1' };
+        return new Response(JSON.stringify({ result: res }), { status: 200 });
+      });
+      const receipt = await verifyBrowserReceipt(evm, callback, { fetch: fetcher as any, indexerUrl: 'http://indexer.invalid', telemetry: true, env: {}, nav: {} });
+      expect(receipt.status).toBe('indexed');
+      expect(telemetryBodies).toEqual([{ event: 'verified-complete', flow: 'tx-evm', durationBucket: 'lt5s', recoveries: 0 }]);
+
+      // Failed execution must NOT emit verified-complete
+      const failedCalls: string[] = [];
+      const failedFetcher = jest.fn(async (url: any) => {
+        failedCalls.push(String(url));
+        return rpc(chainResponse({ code: 5 }))(url);
+      });
+      const failed = await verifyBrowserReceipt(request, result, { fetch: failedFetcher as any, indexerUrl: 'http://indexer.invalid', telemetry: true, env: {}, nav: {} });
+      expect(failed.status).toBe('failed');
+      expect(failedCalls.some((u) => u.includes('/telemetry/handoff'))).toBe(false);
+    });
+
+    it('never fails receipt verification when the telemetry POST throws or rejects', async () => {
+      const fetcher = jest.fn(async (url: any) => {
+        if (String(url).endsWith('/api/v0/telemetry/handoff')) {
+          throw new Error('Telemetry endpoint unreachable');
+        }
+        if (String(url).endsWith('/api/v0/status')) {
+          return new Response(JSON.stringify({ indexing: { version: 1, network: request.network, chainId: request.chainId, evmChainId: request.evmChainId, completedThroughHeight: '1' } }));
+        }
+        return rpc(chainResponse())(url);
+      });
+      const receipt = await verifyBrowserReceipt(request, result, {
+        fetch: fetcher as any,
+        indexerUrl: 'http://indexer.invalid',
+        telemetry: true,
+        env: {},
+        nav: {}
+      });
+      expect(receipt.status).toBe('indexed');
+      expect(receipt.confirmed).toBe(true);
+    });
+  });
 });

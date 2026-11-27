@@ -11,6 +11,7 @@ import { executeInstalledCli } from '../dist/esm/builder/tools/standardActions.j
 import { listStandardBuilders } from '../dist/esm/core/builders/input-schemas.js';
 import { BitBadgesCollection } from '../dist/esm/api-indexer/BitBadgesCollection.js';
 import { AddressList } from '../dist/esm/core/addressLists.js';
+import { generateAliasAddressForDenom } from '../dist/esm/core/aliases.js';
 import { PAYMENT_REQUEST_EXAMPLES, paymentRequestExample } from '../dist/esm/cli/utils/payment-request-examples.js';
 import { saveSigningRequest } from '../dist/esm/cli/utils/signing-requests.js';
 
@@ -281,6 +282,234 @@ try {
   assert.equal(failed.isError, true);
   const unsafe = await client.callTool({ name: 'standard_pay_requests_pay', arguments: { collectionId: '1', creator, browser: true } });
   assert.equal(unsafe.isError, true);
+
+  // BB-303: vault, ibc-token, and issuer-controlled CLI/MCP workflow parity
+  const recovery = 'bb1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zql3w7';
+  const vaultBuilt = await callTool('build_vault', {
+    backingCoin: 'BADGE',
+    symbol: 'vBADGE',
+    emergencyRecovery: recovery,
+    uri: 'https://example.com/vault.json'
+  });
+  assert.ok(!vaultBuilt.isError, vaultBuilt.text);
+  const vaultId = String(collections.size + 1);
+  collections.set(vaultId, collectionFixture(vaultBuilt.result.value, vaultId));
+  const vaultShown = await action('standard_vault_show', { collectionId: vaultId }, ['vault', 'show', vaultId]);
+  assert.equal(vaultShown.configurationSupported, true);
+  assert.equal(vaultShown.emergencyRecovery.recoveryAddress, recovery);
+  await action('standard_vault_status', { collectionId: vaultId }, ['vault', 'status', vaultId]);
+  await action('standard_vault_deposit', { collectionId: vaultId, creator, amount: '1', baseUnits: true }, [
+    'vault',
+    'deposit',
+    '--creator',
+    creator,
+    '--amount=1',
+    '--base-units',
+    '--',
+    vaultId
+  ]);
+  await action('standard_vault_withdraw', { collectionId: vaultId, creator, amount: '1', baseUnits: true }, [
+    'vault',
+    'withdraw',
+    '--creator',
+    creator,
+    '--amount=1',
+    '--base-units',
+    '--',
+    vaultId
+  ]);
+  const migrated = await action(
+    'standard_vault_emergency_migrate',
+    { collectionId: vaultId, creator: recovery, from: creator, amount: '1', baseUnits: true },
+    ['vault', 'emergency-migrate', '--creator', recovery, '--from', creator, '--amount=1', '--base-units', '--', vaultId]
+  );
+  assert.equal(migrated.value.transfers[0].toAddresses[0], recovery);
+
+  const baseCollectionFields = {
+    collectionMetadata: { uri: 'https://example.com/meta.json', customData: '' },
+    tokenMetadata: [{ uri: 'https://example.com/token.json', customData: '', tokenIds: [{ start: '1', end: '1' }] }],
+    customData: '',
+    isArchived: false,
+    collectionPermissions: {
+      canDeleteCollection: [],
+      canArchiveCollection: [],
+      canUpdateStandards: [],
+      canUpdateCustomData: [],
+      canUpdateManager: [],
+      canUpdateCollectionMetadata: [],
+      canUpdateValidTokenIds: [],
+      canUpdateTokenMetadata: [],
+      canUpdateCollectionApprovals: [],
+      canAddMoreAliasPaths: [],
+      canAddMoreCosmosCoinWrapperPaths: []
+    },
+    defaultBalances: {
+      balances: [],
+      outgoingApprovals: [],
+      incomingApprovals: [],
+      autoApproveAllIncomingTransfers: true,
+      autoApproveSelfInitiatedOutgoingTransfers: true,
+      autoApproveSelfInitiatedIncomingTransfers: true,
+      userPermissions: {
+        canUpdateIncomingApprovals: [],
+        canUpdateOutgoingApprovals: [],
+        canUpdateAutoApproveSelfInitiatedIncomingTransfers: [],
+        canUpdateAutoApproveSelfInitiatedOutgoingTransfers: [],
+        canUpdateAutoApproveAllIncomingTransfers: []
+      }
+    }
+  };
+
+  const ibcId = String(collections.size + 1);
+  const ibcDenom = 'umytoken';
+  const ibcAddress = generateAliasAddressForDenom(ibcDenom);
+  collections.set(
+    ibcId,
+    collectionFixture(
+      {
+        ...baseCollectionFields,
+        manager: '',
+        standards: ['IBC Token Factory'],
+        validTokenIds: [{ start: '1', end: '1' }],
+        cosmosCoinWrapperPaths: [
+          {
+            denom: ibcDenom,
+            symbol: 'MYT',
+            address: ibcAddress,
+            denomUnits: [{ symbol: 'MYT', decimals: '6', isDefaultDisplay: true, metadata: { uri: '', customData: '' } }],
+            metadata: { uri: '', customData: '' },
+            conversion: {
+              sideA: { amount: '1' },
+              sideB: [{ amount: '1', tokenIds: [{ start: '1', end: '1' }], ownershipTimes: [{ start: '1', end: '18446744073709551615' }] }]
+            },
+            allowOverrideWithAnyValidToken: false
+          }
+        ],
+        collectionApprovals: [
+          {
+            approvalId: 'ibc-wrap',
+            fromListId: 'All',
+            toListId: 'All',
+            initiatedByListId: 'All',
+            tokenIds: [{ start: '1', end: '1' }],
+            transferTimes: [{ start: '1', end: '18446744073709551615' }],
+            ownershipTimes: [{ start: '1', end: '18446744073709551615' }],
+            version: '0',
+            approvalCriteria: { allowSpecialWrapping: true }
+          }
+        ]
+      },
+      ibcId
+    )
+  );
+  const ibcShown = await action('standard_ibc_token_show', { collectionId: ibcId }, ['ibc-token', 'show', ibcId]);
+  assert.equal(ibcShown.configurationSupported, true);
+  assert.equal(ibcShown.wrapperPaths[0].fullDenom, `badges:${ibcId}:${ibcDenom}`);
+  await action('standard_ibc_token_status', { collectionId: ibcId }, ['ibc-token', 'status', ibcId]);
+  const wrapped = await action('standard_ibc_token_wrap', { collectionId: ibcId, creator, amount: '2.5' }, [
+    'ibc-token',
+    'wrap',
+    '--creator',
+    creator,
+    '--amount=2.5',
+    '--',
+    ibcId
+  ]);
+  assert.equal(wrapped.value.transfers[0].balances[0].amount, '2500000');
+  assert.equal(wrapped.value.transfers[0].toAddresses[0], ibcAddress);
+  const unwrapped = await action('standard_ibc_token_unwrap', { collectionId: ibcId, creator, amount: '500000', baseUnits: true }, [
+    'ibc-token',
+    'unwrap',
+    '--creator',
+    creator,
+    '--amount=500000',
+    '--base-units',
+    '--',
+    ibcId
+  ]);
+  assert.equal(unwrapped.value.transfers[0].from, ibcAddress);
+
+  const issuerId = String(collections.size + 1);
+  collections.set(
+    issuerId,
+    collectionFixture(
+      {
+        ...baseCollectionFields,
+        manager: creator,
+        standards: ['Issuer-Controlled Tokens'],
+        validTokenIds: [{ start: '1', end: '10' }],
+        collectionApprovals: [
+          {
+            approvalId: 'issuer-mint',
+            fromListId: 'Mint',
+            toListId: 'All',
+            initiatedByListId: creator,
+            tokenIds: [{ start: '1', end: '10' }],
+            transferTimes: [{ start: '1', end: '18446744073709551615' }],
+            ownershipTimes: [{ start: '1', end: '18446744073709551615' }],
+            version: '0',
+            approvalCriteria: { overridesFromOutgoingApprovals: true, overridesToIncomingApprovals: true }
+          },
+          {
+            approvalId: 'issuer-transfer',
+            fromListId: '!Mint',
+            toListId: 'All',
+            initiatedByListId: creator,
+            tokenIds: [{ start: '1', end: '10' }],
+            transferTimes: [{ start: '1', end: '18446744073709551615' }],
+            ownershipTimes: [{ start: '1', end: '18446744073709551615' }],
+            version: '0',
+            approvalCriteria: { overridesFromOutgoingApprovals: true, overridesToIncomingApprovals: true }
+          }
+        ]
+      },
+      issuerId
+    )
+  );
+  const issuerShown = await action('standard_issuer_controlled_show', { collectionId: issuerId }, ['issuer-controlled', 'show', issuerId]);
+  assert.equal(issuerShown.configurationSupported, true);
+  assert.equal(issuerShown.manager, creator);
+  await action('standard_issuer_controlled_status', { collectionId: issuerId }, ['issuer-controlled', 'status', issuerId]);
+  await action('standard_issuer_controlled_mint', { collectionId: issuerId, creator, to: recovery, tokenId: '1', amount: '5' }, [
+    'issuer-controlled',
+    'mint',
+    '--creator',
+    creator,
+    '--to',
+    recovery,
+    '--token-id=1',
+    '--amount=5',
+    '--',
+    issuerId
+  ]);
+  await action(
+    'standard_issuer_controlled_transfer',
+    { collectionId: issuerId, creator, from: recovery, to: creator, tokenId: '1', amount: '2' },
+    ['issuer-controlled', 'transfer', '--creator', creator, '--from', recovery, '--to', creator, '--token-id=1', '--amount=2', '--', issuerId]
+  );
+  await action('standard_issuer_controlled_revoke', { collectionId: issuerId, creator, from: recovery, tokenId: '1', amount: '1' }, [
+    'issuer-controlled',
+    'revoke',
+    '--creator',
+    creator,
+    '--from',
+    recovery,
+    '--token-id=1',
+    '--amount=1',
+    '--',
+    issuerId
+  ]);
+  const frozen = await action('standard_issuer_controlled_freeze', { collectionId: issuerId, creator }, [
+    'issuer-controlled',
+    'freeze',
+    '--creator',
+    creator,
+    '--',
+    issuerId
+  ]);
+  assert.equal(frozen.typeUrl, '/tokenization.MsgUniversalUpdateCollection');
+  assert.equal(frozen.value.manager, '');
+
   const requestId = 'a'.repeat(32);
   saveSigningRequest({
     version: 2,

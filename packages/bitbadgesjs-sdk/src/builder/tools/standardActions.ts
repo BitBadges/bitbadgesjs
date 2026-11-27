@@ -13,12 +13,18 @@ import { auctionsCommand } from '../../cli/commands/auctions.js';
 import { crowdfundsCommand } from '../../cli/commands/crowdfunds.js';
 import { bountiesCommand } from '../../cli/commands/bounties.js';
 import { predictionMarketsCommand } from '../../cli/commands/prediction-markets.js';
+import { vaultCommand } from '../../cli/commands/vault.js';
+import { ibcTokenCommand } from '../../cli/commands/ibc-token.js';
+import { issuerControlledCommand } from '../../cli/commands/issuer-controlled.js';
 
 const surfaces: [Command, string[]][] = [
   [payRequestsCommand, ['list', 'show', 'status', 'pay', 'deny']],
   [subscriptionsCommand, ['list', 'status', 'claim', 'enable-renewal', 'cancel', 'subscribe', 'charge-due']],
   [standardsCommand, ['inspect']],
   [smartTokensCommand, ['list', 'show', 'status', 'deposit', 'withdraw']],
+  [vaultCommand, ['list', 'show', 'status', 'deposit', 'withdraw', 'emergency-migrate']],
+  [ibcTokenCommand, ['show', 'status', 'wrap', 'unwrap']],
+  [issuerControlledCommand, ['show', 'status', 'mint', 'transfer', 'revoke', 'freeze']],
   [spendableCreditsCommand, ['show', 'quote', 'purchase', 'consume']],
   [creditTokensCommand, ['list', 'show', 'quote', 'purchase']],
   [productsCommand, ['list', 'show', 'purchase']],
@@ -34,6 +40,8 @@ const allowedOptions = new Set([
   '--request-id',
   '--family',
   '--creator',
+  '--from',
+  '--to',
   '--tier',
   '--tip',
   '--approval-id',

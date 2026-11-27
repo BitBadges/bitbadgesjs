@@ -29,6 +29,27 @@ describe('standard lifecycle discovery', () => {
     expect(nft.cliHelp).toEqual(['bb', 'nfts', '--help']);
     expect(nft.validation?.semanticConformance).toBe('not-evaluated');
     expect(getStandardCatalog('payment-request-v2').standards[0].actions?.some((action) => action.id.endsWith('_deny'))).toBe(false);
+    const vault = getStandardCatalog('vault').standards[0];
+    expect(vault.cliHelp).toEqual(['bb', 'vault', '--help']);
+    expect(vault.actions?.map((a) => a.id)).toEqual(
+      expect.arrayContaining(['standard_vault_show', 'standard_vault_deposit', 'standard_vault_withdraw', 'standard_vault_emergency_migrate'])
+    );
+    const ibcToken = getStandardCatalog('ibc-token').standards[0];
+    expect(ibcToken.cliHelp).toEqual(['bb', 'ibc-token', '--help']);
+    expect(ibcToken.actions?.map((a) => a.id)).toEqual(
+      expect.arrayContaining(['standard_ibc_token_show', 'standard_ibc_token_status', 'standard_ibc_token_wrap', 'standard_ibc_token_unwrap'])
+    );
+    const issuerControlled = getStandardCatalog('issuer-controlled').standards[0];
+    expect(issuerControlled.cliHelp).toEqual(['bb', 'issuer-controlled', '--help']);
+    expect(issuerControlled.actions?.map((a) => a.id)).toEqual(
+      expect.arrayContaining([
+        'standard_issuer_controlled_show',
+        'standard_issuer_controlled_mint',
+        'standard_issuer_controlled_transfer',
+        'standard_issuer_controlled_revoke',
+        'standard_issuer_controlled_freeze'
+      ])
+    );
   });
   it('links real operation schemas and reports required inputs without duplicating schemas', () => {
     for (const summary of getStandardCatalog().standards) {

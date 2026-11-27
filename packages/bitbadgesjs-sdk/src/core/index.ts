@@ -86,3 +86,7 @@ export * from './spendable-credits.js';
 export * from './intent.js';
 
 export * from './browser-receipt.js';
+export * from './handoff-telemetry.js';
+export * from './vaults.js';
+export * from './ibc-tokens.js';
+export * from './issuer-controlled.js';
