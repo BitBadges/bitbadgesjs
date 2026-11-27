@@ -34,7 +34,7 @@ try {
   const standards = cli(['dev', 'standards']).data;
   assert.equal(standards.schemaVersion, 1);
   assert.deepEqual((await callTool('get_standards', {})).result, standards);
-  for (const id of ['subscription', 'payment-request-v2', 'quests']) {
+  for (const id of ['subscription', 'payment-request-v2', 'quests', 'vault', 'ibc-token', 'issuer-controlled']) {
     const detail = cli(['dev', 'standards', id]).data;
     assert.deepEqual((await callTool('get_standards', { id })).result, detail);
     assert.equal(detail.standards[0].eligibility, 'not-evaluated');
@@ -114,6 +114,31 @@ try {
     const proposal = cli([...command, '--json', JSON.stringify(subscription), '--json-only']);
     assert.equal(proposal.data.typeUrl, '/tokenization.MsgCreateCollection');
     assert.ok(proposal.data.value.collectionApprovals.length > 0);
+  }
+  const vaultInput = {
+    backingCoin: 'BADGE',
+    symbol: 'vBADGE',
+    uri: 'https://example.com/metadata.json'
+  };
+  const vaultDirect = cli(['build', 'vault', '--json', JSON.stringify(vaultInput), '--json-only']);
+  const vaultAlias = cli(['vault', 'build', '--json', JSON.stringify(vaultInput), '--json-only']);
+  assert.deepEqual(vaultAlias.data, vaultDirect.data);
+
+  for (const group of ['vault', 'ibc-token', 'issuer-controlled']) {
+    const response = spawnSync(process.execPath, ['--require', clockFile, entry, group, '--help-json'], {
+      cwd: sandbox,
+      env: { PATH: process.env.PATH, HOME: sandbox, NODE_ENV: 'test' },
+      encoding: 'utf8',
+      timeout: 30_000,
+      maxBuffer: 8 * 1024 * 1024
+    });
+    assert.ifError(response.error);
+    assert.equal(response.status, 0, `${group} --help-json: ${response.stderr}`);
+    const tree = JSON.parse(response.stdout);
+    assert.equal(tree.path, group);
+    assert.equal(tree.commands[0].name, group);
+    assert.ok(tree.commands[0].subcommands.length >= 4);
+    checks++;
   }
   console.log(
     `Agent artifact contracts passed: ${checks} CLI invocations, ${skills.length} skills, ${examples.length} payment examples. No signing or broadcast.`

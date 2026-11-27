@@ -54,10 +54,12 @@ const frontendFamilies: Record<string, string> = {
 const lifecycle: Record<string, Lifecycle> = {
   'ibc-token': {
     summary: 'IBC token factory collection family.',
+    actionGroup: 'ibc_token',
+    cliHelp: ['bb', 'ibc-token', '--help'],
     constraints: [
-      'IBC denominations, aliases, and configured backing must be inspected independently. No dedicated one-shot builder is mapped here.'
+      'IBC denominations, wrapper paths, aliases, and configured backing must be inspected independently. No dedicated one-shot builder is mapped here.'
     ],
-    unsupported: ['A dedicated standard builder or lifecycle action adapter in this catalog.']
+    unsupported: ['A dedicated one-shot collection builder in this catalog.']
   },
   'tradable-fungible': {
     summary: 'Tradable fungible token collection family.',
@@ -79,8 +81,10 @@ const lifecycle: Record<string, Lifecycle> = {
   },
   'issuer-controlled': {
     summary: 'Tokens with issuer-defined transfer controls.',
+    actionGroup: 'issuer_controlled',
+    cliHelp: ['bb', 'issuer-controlled', '--help'],
     constraints: ['Inspect issuer authority and mutable permissions before accepting custody or transfer restrictions.'],
-    unsupported: ['A dedicated one-shot builder or standard action adapter in this catalog.']
+    unsupported: ['A dedicated one-shot collection builder in this catalog.']
   },
   subscription: {
     summary: 'Time-bounded access with separately authorized renewal payments.',
@@ -174,6 +178,8 @@ const lifecycle: Record<string, Lifecycle> = {
   vault: {
     summary: 'A vault builder using existing smart-token primitives.',
     inspectionFamily: 'smart-token',
+    actionGroup: 'vault',
+    cliHelp: ['bb', 'vault', '--help'],
     constraints: [
       'Review exact spend approvals, recipients, limits, and permissions. Builder availability is not a certification of agent custody safety.'
     ],

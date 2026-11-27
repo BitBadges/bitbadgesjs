@@ -150,3 +150,46 @@ test('uses OS permissions on Windows rather than rejecting synthetic POSIX mode 
     expect(fetcher).toHaveBeenCalledTimes(3);
   } finally { fetcher.mockRestore(); }
 });
+
+test('status verification emits one allowlisted verified-complete telemetry event only when opted in and DNT is unset', async () => {
+  const value = request();
+  value.txsInfo = [{ type: '/cosmos.bank.v1beta1.MsgSend', msg: { fromAddress: signer, toAddress: signer, amount: [{ denom: 'ubadge', amount: '1' }] } }];
+  saveSigningRequest(value);
+  finishSigningRequest(value.requestId, { requestId: value.requestId, outcome: 'submitted', address: signer, network: value.network, chain: value.chain, chainId: value.chainId, hash: 'A'.repeat(64) });
+  const telemetryPosts: string[] = [];
+  const fetcher = jest.spyOn(globalThis, 'fetch').mockImplementation(async (url, opts: any = {}) => {
+    if (String(url).endsWith('/api/v0/telemetry/handoff')) {
+      telemetryPosts.push(String(opts.body));
+      return new Response(null, { status: 204 });
+    }
+    return new Response(JSON.stringify(
+      String(url).includes('node_info') ? { default_node_info: { network: value.chainId } } : String(url).endsWith('/api/v0/status') ?
+        { indexing: { version: 1, network: value.network, chainId: value.chainId, evmChainId: value.evmChainId, completedThroughHeight: '25' } } :
+        { tx: { body: { messages: [{ '@type': value.txsInfo[0].type, ...value.txsInfo[0].msg }] } }, tx_response: { txhash: 'A'.repeat(64), height: '25', code: 0 } }
+    ));
+  });
+  const priorTelemetry = process.env.BITBADGES_HANDOFF_TELEMETRY;
+  const priorDnt = process.env.DO_NOT_TRACK;
+  try {
+    delete process.env.DO_NOT_TRACK;
+    process.env.BITBADGES_HANDOFF_TELEMETRY = '1';
+    const verified = await getSigningRequestStatus(value.requestId, false, true);
+    expect(verified.confirmed).toBe(true);
+    expect(telemetryPosts).toHaveLength(1);
+    const parsed = JSON.parse(telemetryPosts[0]);
+    expect(Object.keys(parsed).sort()).toEqual(['durationBucket', 'event', 'flow', 'recoveries']);
+    expect(parsed).toMatchObject({ event: 'verified-complete', flow: 'tx-cosmos', recoveries: 0 });
+    expect(telemetryPosts[0]).not.toContain(signer);
+    expect(telemetryPosts[0]).not.toContain(value.requestId);
+
+    process.env.DO_NOT_TRACK = '1';
+    await getSigningRequestStatus(value.requestId, false, true);
+    expect(telemetryPosts).toHaveLength(1);
+  } finally {
+    fetcher.mockRestore();
+    if (priorTelemetry === undefined) delete process.env.BITBADGES_HANDOFF_TELEMETRY;
+    else process.env.BITBADGES_HANDOFF_TELEMETRY = priorTelemetry;
+    if (priorDnt === undefined) delete process.env.DO_NOT_TRACK;
+    else process.env.DO_NOT_TRACK = priorDnt;
+  }
+});

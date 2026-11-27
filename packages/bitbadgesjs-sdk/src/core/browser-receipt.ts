@@ -3,6 +3,14 @@ import { NETWORK_CONFIGS } from '../signing/types.js';
 import { encodeMsgFromJson } from '../transactions/messages/fromJson.js';
 import { convertToBitBadgesAddress, convertToEthAddress } from '../address-converter/converter.js';
 import { artifactIdentity } from './intent.js';
+import {
+  clampHandoffRecoveries,
+  durationBucket,
+  isHandoffTelemetryOptedIn,
+  sendHandoffTelemetryEvent,
+  type HandoffPrivacyEnv,
+  type HandoffPrivacyNav
+} from './handoff-telemetry.js';
 
 export type BrowserReceipt = {
   version: 1; requestId: string; artifactId: string; chainId: string;
@@ -10,7 +18,27 @@ export type BrowserReceipt = {
   indexing: 'not-checked' | 'pending' | 'indexed' | 'unknown'; indexedHeight?: string; indexingScope?: 'block-watermark'; confirmed: boolean; retrySafe: false;
   txHash?: string; height?: string; code?: number; createdCollectionIds: string[]; reason: string;
 };
-export type ReceiptOptions = { fetch?: typeof fetch; nodeUrl?: string; evmRpcUrl?: string; timeoutMs?: number; indexerUrl?: string; apiKey?: string; checkIndexer?: boolean };
+export type ReceiptOptions = {
+  fetch?: typeof fetch;
+  nodeUrl?: string;
+  evmRpcUrl?: string;
+  timeoutMs?: number;
+  indexerUrl?: string;
+  apiKey?: string;
+  checkIndexer?: boolean;
+  /** Strictly opt-in verified-complete telemetry. Default off; DNT/GPC always override. */
+  telemetry?: boolean;
+  /** Optional handoff start timestamp (ms since epoch) used only for coarse durationBucket calculation. */
+  handoffStartedAt?: number;
+  /** Optional recovery count (clamped to 0 | 1 | 2). Defaults to 0. */
+  telemetryRecoveries?: number;
+  /** Optional clock override for deterministic duration bucketing. */
+  now?: () => number;
+  /** Optional env override for opt-in and privacy-signal checks. */
+  env?: HandoffPrivacyEnv;
+  /** Optional navigator override for browser DNT/GPC checks. */
+  nav?: HandoffPrivacyNav;
+};
 const normalizedHash = (hash: string) => hash.replace(/^0x/i, '').toLowerCase();
 
 export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: unknown, options: ReceiptOptions = {}): Promise<BrowserReceipt> {
@@ -66,6 +94,26 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
       return { ...receipt, indexing: 'unknown', reason: 'Exact transaction confirmed; indexer completion could not be independently verified.' };
     }
   };
+  const finalize = async (receipt: BrowserReceipt): Promise<BrowserReceipt> => {
+    const finalReceipt = await checkIndexed(receipt);
+    if (finalReceipt.confirmed && isHandoffTelemetryOptedIn({ telemetry: options.telemetry, env: options.env, nav: options.nav })) {
+      const now = options.now ?? Date.now;
+      const elapsedMs = typeof options.handoffStartedAt === 'number' && Number.isFinite(options.handoffStartedAt) ? now() - options.handoffStartedAt : 0;
+      await sendHandoffTelemetryEvent({
+        indexerUrl: (options.indexerUrl ?? config.apiUrl).replace(/\/$/, ''),
+        apiKey: options.apiKey,
+        fetch: options.fetch,
+        signal: controller.signal,
+        event: {
+          event: 'verified-complete',
+          flow: request.chain === 'cosmos' ? 'tx-cosmos' : 'tx-evm',
+          durationBucket: durationBucket(elapsedMs),
+          recoveries: clampHandoffRecoveries(options.telemetryRecoveries)
+        }
+      });
+    }
+    return finalReceipt;
+  };
   try {
     if (request.chain === 'cosmos') {
       const url = (options.nodeUrl ?? config.nodeUrl).replace(/\/$/, '');
@@ -99,7 +147,7 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
         try { original = JSON.parse(attrs.msg); } catch { continue; }
         if (original.collectionId === '0' && typeof attrs.collectionId === 'string' && /^[1-9][0-9]*$/.test(attrs.collectionId)) createdCollectionIds.push(attrs.collectionId);
       }
-      return await checkIndexed({ ...submitted, status: execution.code === 0 ? 'confirmed' : 'failed', confirmed: execution.code === 0, height: String(execution.height), code: execution.code,
+      return await finalize({ ...submitted, status: execution.code === 0 ? 'confirmed' : 'failed', confirmed: execution.code === 0, height: String(execution.height), code: execution.code,
         createdCollectionIds: [...new Set(createdCollectionIds)], reason: execution.code === 0 ? 'Configured chain reports successful execution of the exact requested messages. Indexer state is not checked.' : 'Configured chain reports failed execution of the requested transaction.' });
     }
     const rpc = options.evmRpcUrl ?? config.evmRpcUrl;
@@ -115,7 +163,7 @@ export async function verifyBrowserReceipt(input: BrowserTxRequestV2, callback: 
       BigInt(tx.value) !== BigInt(request.tx.value ?? '0') || (tx.input ?? '0x').toLowerCase() !== (request.tx.data ?? '0x').toLowerCase() ||
       !['0x0', '0x1'].includes(receipt.status) || BigInt(receipt.blockNumber) <= 0n) throw new Error('EVM request/result mismatch');
     const confirmed = receipt.status === '0x1';
-    return await checkIndexed({ ...submitted, status: confirmed ? 'confirmed' : 'failed', confirmed, height: BigInt(receipt.blockNumber).toString(), code: confirmed ? 0 : 1,
+    return await finalize({ ...submitted, status: confirmed ? 'confirmed' : 'failed', confirmed, height: BigInt(receipt.blockNumber).toString(), code: confirmed ? 0 : 1,
       reason: 'Configured EVM chain execution checked against requested signer, destination, value and calldata. Indexer state is not checked.' });
   } catch {
     return { ...submitted, status: 'unknown', reason: 'Execution could not be independently bound to the exact request and chain. Check wallet activity and chain status before retrying.' };

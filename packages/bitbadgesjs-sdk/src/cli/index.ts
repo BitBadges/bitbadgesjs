@@ -199,6 +199,9 @@ import { auctionsCommand } from './commands/auctions.js';
 import { predictionMarketsCommand } from './commands/prediction-markets.js';
 import { standardsCommand } from './commands/standards.js';
 import { smartTokensCommand } from './commands/smart-tokens.js';
+import { vaultCommand } from './commands/vault.js';
+import { ibcTokenCommand } from './commands/ibc-token.js';
+import { issuerControlledCommand } from './commands/issuer-controlled.js';
 import { nftsCommand } from './commands/nfts.js';
 import { custom2faCommand } from './commands/custom-2fa.js';
 
@@ -308,6 +311,9 @@ const HELP_GROUPS: { title: string; commands: Command[] }[] = [
       auctionsCommand,
       predictionMarketsCommand,
       smartTokensCommand,
+      vaultCommand,
+      ibcTokenCommand,
+      issuerControlledCommand,
       standardsCommand,
       nftsCommand,
       custom2faCommand,
@@ -338,7 +344,8 @@ const STANDARD_BUILD_ALIASES: Record<string, string> = {
   'prediction-markets': 'prediction-market',
   products: 'product-catalog',
   'smart-tokens': 'smart-token',
-  subscriptions: 'subscription'
+  subscriptions: 'subscription',
+  vault: 'vault'
 };
 const standardsByName = new Map<string, Command>();
 for (const group of HELP_GROUPS) {
