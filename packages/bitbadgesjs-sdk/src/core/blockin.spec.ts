@@ -111,6 +111,17 @@ describe('SiwbbChallenge', () => {
 });
 
 describe('generateBitBadgesAuthUrl', () => {
+  it('round-trips state and redirect_uri values that contain query metacharacters', () => {
+    const state = 'eyJyZXR1cm5UbyI6Ii9kYXNoIn0=+/= csrf=1&next=/a#frag';
+    const redirect_uri = 'https://example.com/api/callback?provider=bitbadges&env=prod';
+    const url = generateBitBadgesAuthUrl({ client_id: 'my-app', redirect_uri, state, scope: 'completeClaims' });
+    const q = new URL(url).searchParams;
+    expect(q.get('state')).toBe(state);
+    expect(q.get('redirect_uri')).toBe(redirect_uri);
+    expect(q.get('scope')).toBe('completeClaims');
+    expect([...q.keys()].sort()).toEqual(['client_id', 'redirect_uri', 'scope', 'state']);
+  });
+
   it('should generate URL with client_id', () => {
     const url = generateBitBadgesAuthUrl({ client_id: 'my-app' });
     expect(url).toContain('https://bitbadges.io/siwbb/authorize?');
