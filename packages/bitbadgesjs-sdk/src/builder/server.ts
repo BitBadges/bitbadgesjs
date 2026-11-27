@@ -9,6 +9,8 @@
  * just one presentation layer among several.
  */
 
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
@@ -19,6 +21,64 @@ import {
 
 import { toolRegistry, listTools, callTool } from './tools/registry.js';
 import { listResources, readResource } from './resources/registry.js';
+
+function findPackageVersionFrom(startDir: string): string | undefined {
+  let directory = startDir;
+  for (;;) {
+    const file = join(directory, 'package.json');
+    if (existsSync(file)) {
+      try {
+        const pkg = JSON.parse(readFileSync(file, 'utf8'));
+        if ((pkg.name === 'bitbadges' || pkg.name === 'bitbadgesjs-sdk') && typeof pkg.version === 'string') {
+          return pkg.version;
+        }
+      } catch {
+        // Ignore unreadable package.json and continue walking upward.
+      }
+    }
+    const parent = dirname(directory);
+    if (parent === directory) return undefined;
+    directory = parent;
+  }
+}
+
+/**
+ * Resolve the installed `bitbadges` package version from `package.json`.
+ * Works across CJS, ESM, Jest, and globally symlinked CLI bin invocations.
+ */
+export function getBuilderPackageVersion(entryFile?: string): string {
+  const candidates: string[] = [];
+  if (entryFile) {
+    try {
+      candidates.push(dirname(realpathSync(entryFile)));
+    } catch {
+      candidates.push(dirname(entryFile));
+    }
+  }
+  if (typeof __dirname === 'string') {
+    candidates.push(__dirname);
+  }
+  if (process.argv[1]) {
+    try {
+      candidates.push(dirname(realpathSync(process.argv[1])));
+    } catch {
+      candidates.push(dirname(process.argv[1]));
+    }
+  }
+  candidates.push(process.cwd());
+  candidates.push(join(process.cwd(), 'packages', 'bitbadgesjs-sdk'));
+
+  for (const dir of candidates) {
+    const version = findPackageVersionFrom(dir);
+    if (version) return version;
+  }
+  return '0.0.0';
+}
+
+export interface CreateServerOptions {
+  /** Optional toolset filter override (defaults to `BITBADGES_MCP_TOOLSETS` env var). */
+  toolsets?: string | readonly string[];
+}
 
 /**
  * Create and configure the BitBadges Builder MCP stdio server.
@@ -47,11 +107,11 @@ Inspect isError and structured results. Proposed, signed, submitted, confirmed a
 Follow each tool's schema exactly. Integer amounts, IDs and timestamp bounds generally use decimal strings; schema literals such as PaymentRequestV2 version: 2 are numeric. Direct invoice payments do not provide cancellation, refunds, escrow or prorations. Never imply that descriptive metadata or skill prose enforces a guardrail.`;
 }
 
-export function createServer(): Server {
+export function createServer(options: CreateServerOptions = {}): Server {
   const server = new Server(
     {
       name: 'bitbadges-builder',
-      version: '1.0.0'
+      version: getBuilderPackageVersion()
     },
     {
       capabilities: {
@@ -62,9 +122,9 @@ export function createServer(): Server {
     }
   );
 
-  // ListTools — dump every registered tool in registry order.
+  // ListTools — dump registered tools in registry order (honoring BITBADGES_MCP_TOOLSETS).
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: listTools()
+    tools: listTools(options.toolsets)
   }));
 
   // CallTool — dispatch through the registry. The registry never throws, so
@@ -80,7 +140,7 @@ export function createServer(): Server {
         ? { structuredContent: typeof result === 'object' && !Array.isArray(result) ? result : { data: result } }
         : {})
     };
-    if (isError) response.isError = true;
+    if (isError !== undefined) response.isError = isError;
     return response;
   });
 

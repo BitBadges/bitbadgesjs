@@ -66,6 +66,8 @@ export interface NetworkOptions {
   mainnet?: boolean;
   /** Custom API base URL — overrides every other selector. */
   url?: string;
+  /** API key override — wins over BITBADGES_API_KEY env var and config. */
+  apiKey?: string;
 }
 
 /**
@@ -132,6 +134,7 @@ export function getApiUrl(options: NetworkOptions): string {
  * the user has stashed via `bitbadges-cli config set apiKeyLocal <key>`.
  */
 export function getApiKeyForNetwork(options: NetworkOptions): string | undefined {
+  if (options.apiKey) return options.apiKey;
   const envKey = process.env.BITBADGES_API_KEY;
   if (envKey) return envKey;
   return getConfigApiKey(resolveNetwork(options));

@@ -563,4 +563,59 @@ describe('keyring command quoting, argv, and private temp files', () => {
       if (result.tmpDir) fs.rmSync(result.tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('passes --chain-id, --keyring-dir, and --home through in both args and commandLine (BB-315)', () => {
+    const single = buildKeyringCommand({
+      msg: sampleMsg,
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      keyringDir: '/tmp/custom keyring',
+      home: '/tmp/bb-home',
+      chainId: 'bitbadges-local-9',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    try {
+      expect(single.args).toContain('--chain-id');
+      expect(single.args).toContain('bitbadges-local-9');
+      expect(single.args).toContain('--keyring-dir');
+      expect(single.args).toContain('/tmp/custom keyring');
+      expect(single.args).toContain('--home');
+      expect(single.args).toContain('/tmp/bb-home');
+      expect(single.commandLine).toContain('--chain-id bitbadges-local-9');
+      expect(single.commandLine).toContain("--keyring-dir '/tmp/custom keyring'");
+      expect(single.commandLine).toContain('--home /tmp/bb-home');
+    } finally {
+      if (single.tmpDir) fs.rmSync(single.tmpDir, { recursive: true, force: true });
+    }
+
+    const multi = buildKeyringMultiCommand({
+      messages: [sampleMsg, sampleMsg],
+      from: 'alice',
+      network: 'local',
+      binary: 'bitbadgeschaind',
+      keyringBackend: 'test',
+      keyringDir: '/tmp/keys',
+      home: '/tmp/home',
+      chainId: 'bitbadges-local-9',
+      gas: 'auto',
+      gasAdjustment: '1.3'
+    });
+    try {
+      for (const step of multi.steps) {
+        expect(step.args).toContain('bitbadges-local-9');
+        expect(step.args).toContain('--keyring-dir');
+        expect(step.args).toContain('/tmp/keys');
+        expect(step.args).toContain('--home');
+        expect(step.args).toContain('/tmp/home');
+      }
+      expect(multi.commandLine).toContain('--chain-id bitbadges-local-9');
+      expect(multi.commandLine).toContain('--keyring-dir /tmp/keys');
+      expect(multi.commandLine).toContain('--home /tmp/home');
+    } finally {
+      if (multi.tmpDir) fs.rmSync(multi.tmpDir, { recursive: true, force: true });
+    }
+  });
 });

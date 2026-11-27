@@ -7,8 +7,12 @@
  * is the only consumer of `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` etc.;
  * the MCP transport itself must not reach for them.
  */
-import { createServer, getServerInstructions } from './server.js';
-import { listTools, callTool, toolRegistry } from './tools/registry.js';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { createServer, getServerInstructions, getBuilderPackageVersion } from './server.js';
+import { handleBuilderCliArgs } from './index.js';
+import { listTools, callTool, toolRegistry, getToolToolsets, MCP_TOOLSET_NAMES } from './tools/registry.js';
 
 const MODEL_ENV_VARS = [
   'ANTHROPIC_API_KEY',
@@ -92,6 +96,77 @@ describe('MCP server instructions', () => {
     const toolLike = named.filter((n) => n in toolRegistry || /^(set|add|get|remove|list|validate|review|simulate|generate|reset|query|build|explain|search|lookup|verify|flag|analyze)_/.test(n));
     for (const name of new Set(toolLike)) {
       expect(Object.keys(toolRegistry)).toContain(name);
+    }
+  });
+});
+
+describe('MCP server ergonomics (BB-313)', () => {
+  const pkg = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf8')) as { version: string };
+
+  it('reads server version from package.json instead of hardcoded 1.0.0', () => {
+    expect(getBuilderPackageVersion()).toBe(pkg.version);
+    expect(getBuilderPackageVersion()).not.toBe('1.0.0');
+  });
+
+  it('handles --version / -v and --help / -h before starting stdio transport', () => {
+    expect(handleBuilderCliArgs(['--version'])).toEqual({ exit: true, stdout: `${pkg.version}\n` });
+    expect(handleBuilderCliArgs(['-v'])).toEqual({ exit: true, stdout: `${pkg.version}\n` });
+    const help = handleBuilderCliArgs(['--help']);
+    expect(help.exit).toBe(true);
+    expect(help.stdout).toContain('bitbadges-builder');
+    expect(help.stdout).toContain('BITBADGES_MCP_TOOLSETS');
+    expect(handleBuilderCliArgs(['-h']).exit).toBe(true);
+    expect(handleBuilderCliArgs([])).toEqual({ exit: false });
+
+    const entry = join(__dirname, 'index.ts');
+    const verRun = spawnSync('bun', [entry, '--version'], { encoding: 'utf-8', timeout: 10_000 });
+    expect(verRun.status).toBe(0);
+    expect(verRun.stdout.trim()).toBe(pkg.version);
+
+    const helpRun = spawnSync('bun', [entry, '--help'], { encoding: 'utf-8', timeout: 10_000 });
+    expect(helpRun.status).toBe(0);
+    expect(helpRun.stdout).toContain('BITBADGES_MCP_TOOLSETS');
+  });
+
+  it('validate_address returns isError: false for invalid addresses', async () => {
+    const res = await callTool('validate_address', { address: 'garbage' });
+    expect(res.isError).toBe(false);
+    expect(res.result.valid).toBe(false);
+  });
+
+  it('diagnose_error returns isError: false when no pattern matches', async () => {
+    const res = await callTool('diagnose_error', { error: 'xyzzy totally unrelated gibberish 98765' });
+    expect(res.isError).toBe(false);
+    expect(res.result.diagnosis).toBeNull();
+  });
+
+  it('filters tools/list via BITBADGES_MCP_TOOLSETS and assigns every tool to at least one toolset', () => {
+    for (const name of Object.keys(toolRegistry)) {
+      expect(getToolToolsets(name).length).toBeGreaterThan(0);
+    }
+    expect(MCP_TOOLSET_NAMES).toEqual(expect.arrayContaining(['build', 'query', 'standards', 'validate', 'docs']));
+
+    const saved = process.env.BITBADGES_MCP_TOOLSETS;
+    try {
+      delete process.env.BITBADGES_MCP_TOOLSETS;
+      const all = listTools();
+      expect(all.length).toBe(Object.keys(toolRegistry).length);
+
+      process.env.BITBADGES_MCP_TOOLSETS = 'docs';
+      const docsOnly = listTools();
+      expect(docsOnly.length).toBeGreaterThan(0);
+      expect(docsOnly.length).toBeLessThan(all.length);
+      expect(docsOnly.map((t) => t.name)).toContain('list_skills');
+      expect(docsOnly.map((t) => t.name)).not.toContain('query_collection');
+
+      process.env.BITBADGES_MCP_TOOLSETS = 'query,validate';
+      const queryAndValidate = listTools();
+      expect(queryAndValidate.map((t) => t.name)).toContain('query_collection');
+      expect(queryAndValidate.map((t) => t.name)).toContain('validate_transaction');
+      expect(queryAndValidate.map((t) => t.name)).not.toContain('set_standards');
+    } finally {
+      if (saved === undefined) delete process.env.BITBADGES_MCP_TOOLSETS;
+      else process.env.BITBADGES_MCP_TOOLSETS = saved;
     }
   });
 });

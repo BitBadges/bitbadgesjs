@@ -13,7 +13,8 @@ import {
   isQuiet,
   writeJsonEnvelope,
   bbError,
-  BBErrorCode
+  BBErrorCode,
+  formatZodErrorMessage
 } from './envelope.js';
 import { Writable } from 'node:stream';
 
@@ -167,6 +168,17 @@ describe('errorEnvelope hint plumbing', () => {
   it('omits the hint key entirely when there is none', () => {
     const env = errorEnvelope('x', 'boom');
     expect('hint' in env).toBe(false);
+  });
+});
+
+describe('formatZodErrorMessage (BB-312)', () => {
+  it('formats missing required and invalid numeric zod issues with CLI flag hints', () => {
+    const msg = formatZodErrorMessage([
+      { code: 'invalid_type', expected: 'number', received: 'undefined', path: ['price'], message: 'Required' },
+      { code: 'invalid_type', expected: 'number', received: 'nan', path: ['maxSales'], message: 'Expected a finite number' }
+    ]);
+    expect(msg).toContain('missing required --price (price)');
+    expect(msg).toContain('invalid numeric value for --max-sales (maxSales)');
   });
 });
 

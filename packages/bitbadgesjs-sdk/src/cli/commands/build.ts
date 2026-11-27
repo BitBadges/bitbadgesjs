@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { readJsonInput, addNetworkOptions } from '../utils/io.js';
-import { emit as emitEnvelope, isQuiet, type EnvelopeWarning } from '../utils/envelope.js';
+import { emit as emitEnvelope, isQuiet, bbError, BBErrorCode, type EnvelopeWarning } from '../utils/envelope.js';
 import { tagHelpGroups } from '../utils/help-groups.js';
 import {
   renderReview,
@@ -14,13 +14,71 @@ import { isCollectionMsg, normalizeToCreateOrUpdate } from '../utils/normalizeMs
 import { addDeployOptions, isDeployRequested, executeDeploy } from '../utils/deploy-options.js';
 import { buildNextStepHint } from '../utils/next-step.js';
 import { requireBbDenom, DEFAULT_FEE_DENOM } from '../utils/denom.js';
-import { requireBb1AddressStrict } from '../utils/address.js';
+import { requireBb1AddressStrict, tryBb1Address } from '../utils/address.js';
 import { PAYMENT_REQUEST_EXAMPLES, paymentRequestExample, withPaymentMetadata } from '../utils/payment-request-examples.js';
 import { allowJsonInsteadOfRequiredOptions } from '../utils/json-options.js';
 
 export const buildCommand = new Command('build').description(
   'Deterministic transaction builders — flag-based generators for vaults, NFTs, subscriptions, bounties, and more. Output: ready-to-sign JSON. To broadcast, pipe into `bb deploy --burner`.'
 );
+
+// ── Flag validation helpers ──────────────────────────────────────────────────
+
+/**
+ * Validate an optional `--creator` flag value. Accepts canonical `bb1...`
+ * addresses, valid `0x...` addresses (normalized to `bb1...`), or `"Mint"`.
+ * Rejects clearly invalid strings (e.g. `notanaddress`) with `invalid_address`.
+ */
+export function validateCreatorFlag(raw: string | undefined): string | undefined {
+  if (raw === undefined) return undefined;
+  const trimmed = String(raw).trim();
+  if (!trimmed) {
+    throw bbError(
+      BBErrorCode.INVALID_ADDRESS,
+      'Invalid --creator address: value cannot be empty. Expected a valid bb1... address, 0x... address, or "Mint".'
+    );
+  }
+  if (trimmed === 'Mint') return 'Mint';
+  const normalized = tryBb1Address(trimmed);
+  if (!normalized) {
+    throw bbError(
+      BBErrorCode.INVALID_ADDRESS,
+      `Invalid --creator address "${raw}". Expected a valid bb1... address, 0x... address, or "Mint".`,
+      'Pass a valid BitBadges (bb1...) or Ethereum (0x...) address.'
+    );
+  }
+  return normalized;
+}
+
+/**
+ * Parse a numeric CLI flag into a finite number, throwing a human-readable
+ * `invalid_input` error instead of coercing missing/invalid values to `NaN`
+ * (which previously surfaced raw `JSON.stringify(zodIssues)`).
+ */
+export function parseNumericFlag(
+  raw: string | number | undefined,
+  flagName: string,
+  options: { required?: boolean; missingHint?: string } = {}
+): number | undefined {
+  if (raw === undefined) {
+    if (options.required) {
+      throw bbError(
+        BBErrorCode.INVALID_INPUT,
+        options.missingHint ?? `Missing required option ${flagName} <number>.`
+      );
+    }
+    return undefined;
+  }
+  const str = String(raw).trim();
+  if (str === '') {
+    throw bbError(BBErrorCode.INVALID_INPUT, `Invalid numeric value "" for ${flagName}. Expected a finite number.`);
+  }
+  const n = Number(str);
+  if (!Number.isFinite(n)) {
+    throw bbError(BBErrorCode.INVALID_INPUT, `Invalid numeric value "${raw}" for ${flagName}. Expected a finite number.`);
+  }
+  return n;
+}
 
 // ── Output helper ────────────────────────────────────────────────────────────
 
@@ -87,6 +145,11 @@ async function emit(
   // (those are collection-specific).
   const isTransferTx = typeof data?.typeUrl === 'string' && data.typeUrl === '/tokenization.MsgTransferTokens';
 
+  // Validate --creator before mutating the output msg so clearly bogus
+  // addresses (e.g. `--creator notanaddress`) fail fast with invalid_address
+  // instead of silently baking invalid addresses into unsigned transactions.
+  const validatedCreator = validateCreatorFlag(opts.creator);
+
   // Apply --creator / --manager overrides to collection msgs. Builders emit
   // MsgUniversalUpdateCollection internally (superset) — the normalization
   // into MsgCreateCollection / MsgUpdateCollection happens once, at the very
@@ -100,7 +163,7 @@ async function emit(
     // emits `creator: ""` and broadcast fails with "creator is required".
     // Default --creator from --address when --creator is omitted, so the
     // happy path is one fewer flag to pass.
-    const fallbackCreator = opts.creator || (isUserApprovalTx ? (opts as any).address : undefined);
+    const fallbackCreator = validatedCreator || (isUserApprovalTx ? (opts as any).address : undefined);
     if (fallbackCreator) data.value.creator = fallbackCreator;
   }
   if (isCollectionTx && data.value) {
@@ -336,17 +399,33 @@ async function emit(
   // stays stable across both cases. The data slot remains the unmodified
   // {typeUrl, value} msg so `bb build | bb deploy` keeps working with
   // zero envelope-aware parsing on the deploy side.
+  const nextStepHint = buildNextStepHint({
+    deployRequested: isDeployRequested(opts as any),
+    outputFile: opts.outputFile,
+    quiet: isQuiet(opts as any)
+  });
   emitEnvelope(outData, {
     condensed: opts.condensed,
     outputFile: opts.outputFile,
     warnings: warnings.length > 0 ? warnings : undefined,
     meta: Object.keys(meta).length > 0 ? meta : undefined,
-    hint: buildNextStepHint({
-      deployRequested: isDeployRequested(opts as any),
-      outputFile: opts.outputFile,
-      quiet: isQuiet(opts as any)
-    })
+    hint: nextStepHint
   });
+  // When --output-file is used, also emit a compact receipt envelope on stdout
+  // so agent callers parsing stdout as JSON do not hit empty stdout.
+  if (opts.outputFile) {
+    emitEnvelope(
+      {
+        outputFile: opts.outputFile,
+        ...(outData?.typeUrl ? { typeUrl: outData.typeUrl } : {})
+      },
+      {
+        condensed: opts.condensed,
+        warnings: warnings.length > 0 ? warnings : undefined,
+        hint: nextStepHint
+      }
+    );
+  }
 
   // Optionally broadcast the just-built msg inline. The envelope above
   // is always emitted first (so `bb build … | bb deploy` and review
@@ -468,7 +547,7 @@ sharedOpts(
       symbol: opts.symbol,
       image: opts.image,
       description: opts.description,
-      dailyWithdrawLimit: opts.dailyWithdrawLimit ? Number(opts.dailyWithdrawLimit) : undefined,
+      dailyWithdrawLimit: parseNumericFlag(opts.dailyWithdrawLimit, '--daily-withdraw-limit'),
       require2fa: opts.require2fa,
       emergencyRecovery: opts.emergencyRecovery
     }),
@@ -499,7 +578,7 @@ sharedOpts(
   }
   const params: any = {
     interval: opts.interval,
-    tiers: Number(opts.tiers),
+    tiers: parseNumericFlag(opts.tiers, '--tiers', { required: true }),
     transferable: !!opts.transferable,
     updatableMint: !!opts.updatableMint,
     uri: opts.uri,
@@ -521,9 +600,18 @@ sharedOpts(
     }
     params.payouts = payouts;
   } else {
-    params.price = Number(opts.price);
-    params.denom = opts.denom ? requireBbDenom(opts.denom, '--denom') : opts.denom;
-    params.recipient = opts.recipient ? requireBb1AddressStrict(opts.recipient, '--recipient') : opts.recipient;
+    params.price = parseNumericFlag(opts.price, '--price', {
+      required: true,
+      missingHint: 'Missing required --price <amount> (along with --denom and --recipient), or pass --payouts <json>.'
+    });
+    if (!opts.denom) {
+      throw bbError(BBErrorCode.INVALID_INPUT, 'Missing required --denom <symbol|denom> (along with --price and --recipient), or pass --payouts <json>.');
+    }
+    if (!opts.recipient) {
+      throw bbError(BBErrorCode.INVALID_INPUT, 'Missing required --recipient <address> (along with --price and --denom), or pass --payouts <json>.');
+    }
+    params.denom = requireBbDenom(opts.denom, '--denom');
+    params.recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
   }
   emit(buildSubscription(params), opts);
 });
@@ -550,7 +638,7 @@ sharedOpts(
   const submitter = requireBb1AddressStrict(opts.submitter, '--submitter');
   emit(
     buildBounty({
-      amount: Number(opts.amount),
+      amount: parseNumericFlag(opts.amount, '--amount', { required: true })!,
       denom,
       verifier,
       recipient,
@@ -647,7 +735,7 @@ sharedOpts(
   const recipient = requireBb1AddressStrict(opts.recipient, '--recipient');
   emit(
     buildPaymentRequest({
-      amount: Number(opts.amount),
+      amount: parseNumericFlag(opts.amount, '--amount', { required: true })!,
       denom,
       payer,
       recipient,
@@ -677,9 +765,10 @@ sharedOpts(
   }
   const denom = requireBbDenom(opts.denom, '--denom');
   const crowdfunder = opts.crowdfunder ? requireBb1AddressStrict(opts.crowdfunder, '--crowdfunder') : opts.crowdfunder;
+  const creator = validateCreatorFlag(opts.creator);
   emit(
     buildCrowdfund({
-      goal: Number(opts.goal),
+      goal: parseNumericFlag(opts.goal, '--goal', { required: true })!,
       denom,
       crowdfunder,
       deadline: opts.deadline,
@@ -687,7 +776,7 @@ sharedOpts(
       name: opts.name,
       description: opts.description,
       image: opts.image,
-      creator: opts.creator
+      creator
     }),
     opts
   );
@@ -706,6 +795,7 @@ sharedOpts(
     emit(buildAuction(readJsonInput(opts.json)), opts);
     return;
   }
+  const creator = validateCreatorFlag(opts.creator);
   emit(
     buildAuction({
       bidDeadline: opts.bidDeadline,
@@ -715,7 +805,7 @@ sharedOpts(
       description: opts.description,
       image: opts.image,
       seller: opts.seller,
-      creator: opts.creator
+      creator
     }),
     opts
   );
@@ -896,7 +986,7 @@ sharedOpts(
       paymentDenom,
       recipient,
       symbol: opts.symbol,
-      tokensPerUnit: Number(opts.tokensPerUnit),
+      tokensPerUnit: parseNumericFlag(opts.tokensPerUnit, '--tokens-per-unit', { required: true })!,
       uri: opts.uri,
       name: opts.name,
       description: opts.description,
@@ -918,6 +1008,7 @@ sharedOpts(
     emit(buildCustom2FA(readJsonInput(opts.json)), opts);
     return;
   }
+  const creator = validateCreatorFlag(opts.creator);
   emit(
     buildCustom2FA({
       uri: opts.uri,
@@ -926,7 +1017,7 @@ sharedOpts(
       description: opts.description,
       burnable: !!opts.burnable,
       transferable: !!opts.transferable,
-      creator: opts.creator
+      creator
     }),
     opts
   );
@@ -949,6 +1040,7 @@ sharedOpts(
     emit(buildAddressList(readJsonInput(opts.json)), opts);
     return;
   }
+  const creator = validateCreatorFlag(opts.creator);
   emit(
     buildAddressList({
       uri: opts.uri,
@@ -956,7 +1048,7 @@ sharedOpts(
       image: opts.image,
       description: opts.description,
       manager: opts.manager,
-      creator: opts.creator
+      creator
     }),
     opts
   );
@@ -995,9 +1087,9 @@ sharedOpts(
       address,
       collectionId: opts.collectionId,
       payDenom,
-      payAmount: Number(opts.payAmount),
+      payAmount: parseNumericFlag(opts.payAmount, '--pay-amount', { required: true })!,
       receiveDenom,
-      receiveAmount: Number(opts.receiveAmount),
+      receiveAmount: parseNumericFlag(opts.receiveAmount, '--receive-amount', { required: true })!,
       expiration: opts.expiration
     }),
     opts
@@ -1034,9 +1126,9 @@ sharedOpts(
       address,
       collectionId: opts.collectionId,
       tokenIds: opts.tokenIds,
-      price: Number(opts.price),
+      price: parseNumericFlag(opts.price, '--price', { required: true })!,
       denom,
-      maxSales: Number(opts.maxSales),
+      maxSales: parseNumericFlag(opts.maxSales, '--max-sales', { required: true })!,
       expiration: opts.expiration
     }),
     opts
@@ -1067,8 +1159,8 @@ sharedOpts(
       address,
       collectionId: opts.collectionId,
       tokenIds: opts.tokenIds,
-      tokenAmount: Number(opts.tokenAmount),
-      price: Number(opts.price),
+      tokenAmount: parseNumericFlag(opts.tokenAmount, '--token-amount', { required: true })!,
+      price: parseNumericFlag(opts.price, '--price', { required: true })!,
       denom,
       expiration: opts.expiration
     }),
@@ -1104,8 +1196,8 @@ sharedOpts(
       address,
       collectionId: opts.collectionId,
       token: opts.token,
-      amount: Number(opts.amount),
-      price: Number(opts.price),
+      amount: parseNumericFlag(opts.amount, '--amount', { required: true })!,
+      price: parseNumericFlag(opts.price, '--price', { required: true })!,
       denom,
       expiration: opts.expiration
     }),
@@ -1141,8 +1233,8 @@ sharedOpts(
       address,
       collectionId: opts.collectionId,
       token: opts.token,
-      amount: Number(opts.amount),
-      price: Number(opts.price),
+      amount: parseNumericFlag(opts.amount, '--amount', { required: true })!,
+      price: parseNumericFlag(opts.price, '--price', { required: true })!,
       denom,
       expiration: opts.expiration
     }),

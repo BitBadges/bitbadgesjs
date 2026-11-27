@@ -138,11 +138,24 @@ export interface ToolEntry {
    * Defaults to `JSON.stringify(result, null, 2)`.
    */
   formatText?: (result: any) => string;
+  /**
+   * Optional override deciding whether a non-throwing tool result represents
+   * an MCP tool execution error (`isError: true`). Tools whose normal answers
+   * carry `valid: false` (e.g. `validate_address`) or `success: false` for a
+   * non-matching lookup (e.g. `diagnose_error`) override this so normal
+   * results return `isError: false`.
+   */
+  isErrorResult?: (result: any) => boolean;
 }
 
 /** Helper to build a simple sync/async pass-through entry. */
-function entry(tool: any, run: (args: any) => any, formatText?: (result: any) => string): ToolEntry {
-  return { tool, run, formatText };
+function entry(
+  tool: any,
+  run: (args: any) => any,
+  formatText?: (result: any) => string,
+  isErrorResult?: (result: any) => boolean
+): ToolEntry {
+  return { tool, run, formatText, isErrorResult };
 }
 
 // Inline schemas for tools that were previously defined ad-hoc in server.ts.
@@ -280,14 +293,14 @@ export const toolRegistry: Record<string, ToolEntry> = {
 
   // Address utilities
   convert_address: entry(convertAddressTool, handleConvertAddress),
-  validate_address: entry(validateAddressTool, handleValidateAddress),
+  validate_address: entry(validateAddressTool, handleValidateAddress, undefined, (r) => r?.success === false),
 
   // Documentation
   fetch_docs: entry(fetchDocsTool, async (args: any) => await handleFetchDocs(args)),
 
   // Knowledge base
   search_knowledge_base: entry(searchKnowledgeBaseTool, handleSearchKnowledgeBase),
-  diagnose_error: entry(diagnoseErrorTool, handleDiagnoseError),
+  diagnose_error: entry(diagnoseErrorTool, handleDiagnoseError, undefined, () => false),
 
   // Query tools (require API key)
   query_collection: entry(queryCollectionTool, async (args: any) => await handleQueryCollection(args)),
@@ -378,9 +391,144 @@ export function getCapabilityCatalog(id?: string) {
   };
 }
 
-/** List every registered tool schema in registry order. */
-export function listTools(): ToolSchema[] {
-  return Object.values(toolRegistry).map((e) => e.tool);
+export const MCP_TOOLSET_NAMES = [
+  'build',
+  'session',
+  'query',
+  'standards',
+  'validate',
+  'docs',
+  'utilities',
+  'signing'
+] as const;
+
+export type McpToolsetName = (typeof MCP_TOOLSET_NAMES)[number];
+
+const SESSION_TOOL_NAMES = new Set([
+  'list_presets',
+  'get_transaction',
+  'get_review_url',
+  'reset_session'
+]);
+
+const QUERY_TOOL_NAMES = new Set([
+  'query_collection',
+  'query_balance',
+  'verify_ownership',
+  'search',
+  'search_plugins',
+  'analyze_collection',
+  'query_dynamic_store',
+  'lookup_token_info'
+]);
+
+const VALIDATE_TOOL_NAMES = new Set([
+  'validate_transaction',
+  'review_collection',
+  'simulate_transaction',
+  'explain_collection',
+  'validate_address',
+  'validate_intent',
+  'verify_intent',
+  'verify_repairs',
+  'verify_lifecycle_intent',
+  'run_lifecycle',
+  'lifecycle_schema',
+  'get_lifecycle_capabilities',
+  'get_lifecycle_template',
+  'flag_review_item'
+]);
+
+const DOCS_TOOL_NAMES = new Set([
+  'list_skills',
+  'get_skill_instructions',
+  'fetch_docs',
+  'search_knowledge_base',
+  'diagnose_error',
+  'get_capabilities',
+  'environment_diagnostics'
+]);
+
+const UTILITIES_TOOL_NAMES = new Set([
+  'convert_address',
+  'validate_address',
+  'get_current_timestamp',
+  'lookup_token_info',
+  'generate_unique_id',
+  'generate_wrapper_address',
+  'generate_backing_address',
+  'generate_approval',
+  'generate_permissions',
+  'generate_alias_path'
+]);
+
+const SIGNING_TOOL_NAMES = new Set([
+  'request_browser_review',
+  'list_signing_requests',
+  'signing_request_status',
+  'get_review_url'
+]);
+
+/**
+ * Return the toolset categories a registered tool belongs to. Used to filter
+ * `tools/list` when `BITBADGES_MCP_TOOLSETS` is configured.
+ */
+export function getToolToolsets(name: string): McpToolsetName[] {
+  const sets = new Set<McpToolsetName>();
+  const isSession =
+    name.startsWith('set_') ||
+    name.startsWith('add_') ||
+    name.startsWith('remove_') ||
+    SESSION_TOOL_NAMES.has(name);
+
+  if (
+    name === 'get_standards' ||
+    name.startsWith('standard_') ||
+    Object.prototype.hasOwnProperty.call(standardBuilderTools, name) ||
+    name === 'build_payment_request_v2'
+  ) {
+    sets.add('standards');
+  }
+  if (isSession) {
+    sets.add('session');
+    sets.add('build');
+  }
+  if (name.startsWith('build_') || name.startsWith('generate_')) {
+    sets.add('build');
+  }
+  if (QUERY_TOOL_NAMES.has(name)) sets.add('query');
+  if (VALIDATE_TOOL_NAMES.has(name)) sets.add('validate');
+  if (DOCS_TOOL_NAMES.has(name)) sets.add('docs');
+  if (UTILITIES_TOOL_NAMES.has(name)) sets.add('utilities');
+  if (SIGNING_TOOL_NAMES.has(name)) sets.add('signing');
+  return [...sets];
+}
+
+/**
+ * Parse a `BITBADGES_MCP_TOOLSETS` comma-separated value. Returns `undefined`
+ * (no filtering — all tools) when unset, empty, `"all"`, or `"*"`.
+ */
+export function parseToolsetsEnv(raw: string | readonly string[] | undefined): Set<string> | undefined {
+  if (raw === undefined) return undefined;
+  const items = (Array.isArray(raw) ? raw : String(raw).split(','))
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (items.length === 0 || items.includes('*') || items.includes('all')) {
+    return undefined;
+  }
+  return new Set(items);
+}
+
+/**
+ * List registered tool schemas in registry order. Optionally filtered by
+ * toolset categories (or by the `BITBADGES_MCP_TOOLSETS` env var when
+ * `toolsets` is omitted).
+ */
+export function listTools(toolsets?: string | readonly string[]): ToolSchema[] {
+  const active = parseToolsetsEnv(toolsets !== undefined ? toolsets : process.env.BITBADGES_MCP_TOOLSETS);
+  const all = Object.values(toolRegistry).map((e) => e.tool);
+  if (!active) return all;
+  return all.filter((tool) => getToolToolsets(tool.name).some((t) => active.has(t)));
 }
 
 export interface CallToolResult {
@@ -513,7 +661,14 @@ export async function callTool(name: string, args: any): Promise<CallToolResult>
       result = { ...result, sessionBinding: getSessionBinding(args.sessionId) };
     }
     const text = tool.formatText ? tool.formatText(result) : JSON.stringify(result, null, 2);
-    return { text, result, ...(result?.success === false || result?.ok === false || result?.valid === false ? { isError: true } : {}) };
+    const isToolError = tool.isErrorResult
+      ? tool.isErrorResult(result)
+      : result?.success === false || result?.ok === false || result?.valid === false;
+    return {
+      text,
+      result,
+      ...(isToolError ? { isError: true } : tool.isErrorResult ? { isError: false } : {})
+    };
   } catch (error) {
     return {
       text: `Error: ${formatToolError(error)}`,

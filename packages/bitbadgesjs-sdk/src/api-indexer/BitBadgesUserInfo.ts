@@ -451,9 +451,9 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
         return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
 
       case 'createdTokens':
-        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+        return this.getCollectionIdsView(viewId) as AccountViewData<T>[KeyType];
       case 'managingTokens':
-        return this.getAccountBalancesView(viewId) as AccountViewData<T>[KeyType];
+        return this.getCollectionIdsView(viewId) as AccountViewData<T>[KeyType];
 
       case 'publicClaimActivity':
         return this.getClaimActivityView(viewId) as AccountViewData<T>[KeyType];
@@ -494,6 +494,10 @@ export class BitBadgesUserInfo<T extends NumberType> extends ProfileDoc<T> imple
     return (this.views[viewId]?.ids.map((x) => {
       return this.collected.find((y) => y._docId === x);
     }) ?? []) as BalanceDocWithDetails<T>[];
+  }
+
+  getCollectionIdsView(viewId: string): string[] {
+    return [...(this.views[viewId]?.ids ?? [])];
   }
 
   /**
@@ -568,8 +572,8 @@ type AccountViewData<T extends NumberType> = {
   siwbbRequests: SIWBBRequestDoc<T>[];
   transferActivity: TransferActivityDoc<T>[];
   tokensCollected: BalanceDocWithDetails<T>[];
-  createdTokens: BalanceDocWithDetails<T>[];
-  managingTokens: BalanceDocWithDetails<T>[];
+  createdTokens: string[];
+  managingTokens: string[];
   publicClaimActivity: ClaimActivityDoc<T>[];
   allClaimActivity: ClaimActivityDoc<T>[];
   pointsActivity: PointsActivityDoc<T>[];

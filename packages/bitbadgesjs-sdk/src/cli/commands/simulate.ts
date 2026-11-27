@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { addNetworkOptions } from '../utils/io.js';
-import { emitError } from '../utils/envelope.js';
+import { emitError, isQuiet, BBErrorCode } from '../utils/envelope.js';
 
 /**
  * Normalize loose CLI input into a transaction body with a `messages` array.
@@ -57,19 +57,29 @@ export const simulateCommand = addNetworkOptions(
     // Network-aware API key + URL resolution.
     const apiKey = getApiKeyForNetwork(opts);
     if (!apiKey && requiresApiKey(opts)) {
-      process.stderr.write(
-        renderSimulate(
-          {
-            success: false,
-            error: 'No API key. Pass --api-key, run `bb settings set apiKey <key>`, or pass --network local against a key-less local indexer.'
-          },
-          { stream: process.stderr }
-        ) + '\n'
-      );
-      process.exit(2);
+      const msg =
+        'No API key configured. Pass --api-key, set BITBADGES_API_KEY, run `bb settings set apiKey <key>`, or pass --network local against a key-less local indexer.';
+      if (!isQuiet()) {
+        process.stderr.write(renderSimulate({ success: false, error: msg }, { stream: process.stderr }) + '\n');
+      }
+      emitError(new Error(msg), {
+        code: BBErrorCode.MISSING_API_KEY,
+        hint: 'Set BITBADGES_API_KEY, pass --api-key <key>, or run `bb settings set apiKey <key>`.',
+        condensed: opts.condensed,
+        exitCode: 2
+      });
     }
 
-    const raw = readJsonInput(input);
+    let raw: any;
+    try {
+      raw = readJsonInput(input);
+    } catch (err: any) {
+      emitError(err, {
+        code: BBErrorCode.INVALID_INPUT,
+        condensed: opts.condensed,
+        exitCode: 2
+      });
+    }
     const wrapped = ensureTxWrapper(raw);
     const messages = Array.isArray(wrapped?.messages) ? wrapped.messages : [];
     if (messages.length === 0) {
@@ -83,18 +93,17 @@ export const simulateCommand = addNetworkOptions(
             : typeof wrapped === 'object'
               ? `object with keys [${Object.keys(wrapped).join(', ')}]`
               : typeof wrapped;
-      process.stderr.write(
-        renderSimulate(
-          {
-            success: false,
-            error:
-              'Simulate input has an unexpected shape — expected `{messages: [{typeUrl, value}, ...]}` or a single Msg `{typeUrl, value}`. ' +
-              `Got: ${got}.`
-          },
-          { stream: process.stderr }
-        ) + '\n'
-      );
-      process.exit(2);
+      const msg =
+        'Simulate input has an unexpected shape — expected `{messages: [{typeUrl, value}, ...]}` or a single Msg `{typeUrl, value}`. ' +
+        `Got: ${got}.`;
+      if (!isQuiet()) {
+        process.stderr.write(renderSimulate({ success: false, error: msg }, { stream: process.stderr }) + '\n');
+      }
+      emitError(new Error(msg), {
+        code: BBErrorCode.INVALID_INPUT,
+        condensed: opts.condensed,
+        exitCode: 2
+      });
     }
 
     // Refuse to simulate user-level approval messages — see check command for
@@ -103,18 +112,18 @@ export const simulateCommand = addNetworkOptions(
       /\.(MsgUpdateUserApprovals|MsgSetIncomingApproval|MsgSetOutgoingApproval|MsgDeleteIncomingApproval|MsgDeleteOutgoingApproval|MsgPurgeApprovals)$/;
     const firstApprovalMsg = messages.find((m: any) => typeof m?.typeUrl === 'string' && APPROVAL_RE.test(m.typeUrl));
     if (firstApprovalMsg) {
-      process.stderr.write(
-        renderSimulate(
-          {
-            success: false,
-            error:
-              `Cannot simulate user-level approval message (${firstApprovalMsg.typeUrl}). ` +
-              'Use `check` to validate it, or include it inside an alternative approval message that wraps a full collection transaction.'
-          },
-          { stream: process.stderr }
-        ) + '\n'
-      );
-      process.exit(2);
+      const msg =
+        `Cannot simulate user-level approval message (${firstApprovalMsg.typeUrl}). ` +
+        'Use `check` to validate it, or include it inside an alternative approval message that wraps a full collection transaction.';
+      if (!isQuiet()) {
+        process.stderr.write(renderSimulate({ success: false, error: msg }, { stream: process.stderr }) + '\n');
+      }
+      emitError(new Error(msg), {
+        code: 'unsupported_message',
+        hint: 'Use `bb check <input>` to validate user-level approval messages.',
+        condensed: opts.condensed,
+        exitCode: 2
+      });
     }
 
     const result = await simulateMessages({
@@ -128,7 +137,6 @@ export const simulateCommand = addNetworkOptions(
 
     // Per-msg breakdown to stderr as commentary (unless --quiet); envelope
     // to stdout always so pipes always see structured data.
-    const { isQuiet } = await import('../utils/envelope.js');
     if (!isQuiet()) {
       const collectionCache = await prefetchSimulateCollections(result, {
         apiKey,
@@ -147,10 +155,15 @@ export const simulateCommand = addNetworkOptions(
     // agree with each other.
     const simulationFailed = !result.success || result.valid === false;
     if (simulationFailed) {
-      emitError(new Error(result.error || result.simulationError || 'Simulation reported the transaction as invalid.'), {
-        code: 'simulation_failed',
+      const errMsg = result.error || result.simulationError || 'Simulation reported the transaction as invalid.';
+      const isAuthErr = /\b(401|403|unauthorized|api key)\b/i.test(errMsg);
+      emitError(new Error(errMsg), {
+        code: isAuthErr ? BBErrorCode.MISSING_API_KEY : 'simulation_failed',
         meta: { simulation: result },
-        hint: 'Fix the reported error and re-run. `bb check <input>` explains the transaction without touching the network.',
+        hint: isAuthErr
+          ? 'Set BITBADGES_API_KEY, pass --api-key <key>, or run `bb settings set apiKey <key>`.'
+          : 'Fix the reported error and re-run. `bb check <input>` explains the transaction without touching the network.',
+        condensed: opts.condensed,
         exitCode: 2
       });
     }

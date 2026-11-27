@@ -420,6 +420,8 @@ export const deployCommand = new Command('deploy')
   .option('--from <name>', 'With --with-keyring: keyring identity to sign as (e.g. "alice"). Maps to the binary\'s --from flag.')
   .option('--binary <name>', 'With --with-keyring: chain binary name on PATH', 'bitbadgeschaind')
   .option('--keyring-backend <backend>', 'With --with-keyring: keyring backend (os | file | test | pass | kwallet)', 'os')
+  .option('--keyring-dir <dir>', 'With --with-keyring: custom keyring directory passthrough (--keyring-dir)')
+  .option('--home <dir>', 'With --with-keyring: chain binary home directory passthrough (--home)')
   .option('--gas-adjustment <n>', 'With --with-keyring: gas-adjustment passthrough', '1.3')
   .option('--frontend-url <url>', 'With --browser: override the frontend base URL (defaults vary by network).')
   .option('--no-open', 'With --browser: print the sign URL to stderr instead of auto-launching the browser.')
@@ -461,7 +463,7 @@ export const deployCommand = new Command('deploy')
   .option('--pubkey-type <type>', 'With --gen-payload: secp256k1 (sha256 signBytes) or ethsecp256k1 / eth_secp256k1 (keccak256). Default: secp256k1, or the indexer account pubKeyType.')
   .option('--account-number <n>', 'With --gen-payload: override account number (skip indexer round-trip).')
   .option('--sequence <n>', 'With --gen-payload: override sequence (skip indexer round-trip).')
-  .option('--chain-id <id>', 'With --gen-payload: Cosmos chain ID override (default per network).')
+  .option('--chain-id <id>', 'With --with-keyring or --gen-payload: Cosmos chain ID override (default per network).')
   .option('--memo <text>', 'With --gen-payload: optional tx memo', '')
   .option('--no-fetch', 'With --gen-payload: skip the indexer account-info round-trip; require --account-number, --sequence, and --public-key.');
 addNetworkOptions(deployCommand);
@@ -738,6 +740,9 @@ deployCommand.action(async (input: string | undefined, opts: any) => {
       network: networkName,
       binary: String(opts.binary ?? 'bitbadgeschaind'),
       keyringBackend: String(opts.keyringBackend ?? 'os'),
+      keyringDir: opts.keyringDir ? String(opts.keyringDir) : undefined,
+      home: opts.home ? String(opts.home) : undefined,
+      chainId: opts.chainId ? String(opts.chainId) : undefined,
       gas,
       gasAdjustment: String(opts.gasAdjustment ?? '1.3'),
       manager: opts.manager ? String(opts.manager) : undefined

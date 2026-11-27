@@ -82,6 +82,10 @@ export interface KeyringCommandOptions {
   network: 'mainnet' | 'testnet' | 'local';
   binary: string;
   keyringBackend: string;
+  /** Optional custom keyring directory passthrough (`--keyring-dir`). */
+  keyringDir?: string;
+  /** Optional chain binary home directory passthrough (`--home`). */
+  home?: string;
   gas: string;
   gasAdjustment: string;
   /** Optional manager backfill for create-collection — applied to `msg.value.manager` if missing. */
@@ -121,11 +125,11 @@ function writePrivateJsonFile(filePath: string, data: unknown): void {
 
 function buildStepArgs(
   subArgs: string[],
-  opts: { from: string; keyringBackend: string; gas: string; gasAdjustment: string },
+  opts: { from: string; keyringBackend: string; keyringDir?: string; home?: string; gas: string; gasAdjustment: string },
   chainId: string,
   nodeUrl: string
 ): string[] {
-  return [
+  const args = [
     'tx',
     'tokenization',
     ...subArgs,
@@ -136,7 +140,15 @@ function buildStepArgs(
     '--node',
     nodeUrl,
     '--keyring-backend',
-    opts.keyringBackend,
+    opts.keyringBackend
+  ];
+  if (opts.keyringDir) {
+    args.push('--keyring-dir', opts.keyringDir);
+  }
+  if (opts.home) {
+    args.push('--home', opts.home);
+  }
+  args.push(
     '--gas',
     opts.gas,
     '--gas-adjustment',
@@ -144,26 +156,36 @@ function buildStepArgs(
     '--gas-prices',
     '10ubadge',
     '--yes'
-  ];
+  );
+  return args;
 }
 
 function formatFlagLines(
   binary: string,
   subArgs: string[],
-  opts: { from: string; keyringBackend: string; gas: string; gasAdjustment: string },
+  opts: { from: string; keyringBackend: string; keyringDir?: string; home?: string; gas: string; gasAdjustment: string },
   chainId: string,
   nodeUrl: string
 ): string[] {
   const head = [binary, 'tx', 'tokenization', ...subArgs].map(shellQuote).join(' ');
-  return [
+  const lines = [
     `${head} \\`,
     `    --from ${shellQuote(opts.from)} \\`,
     `    --chain-id ${shellQuote(chainId)} \\`,
     `    --node ${shellQuote(nodeUrl)} \\`,
-    `    --keyring-backend ${shellQuote(opts.keyringBackend)} \\`,
+    `    --keyring-backend ${shellQuote(opts.keyringBackend)} \\`
+  ];
+  if (opts.keyringDir) {
+    lines.push(`    --keyring-dir ${shellQuote(opts.keyringDir)} \\`);
+  }
+  if (opts.home) {
+    lines.push(`    --home ${shellQuote(opts.home)} \\`);
+  }
+  lines.push(
     `    --gas ${shellQuote(opts.gas)} --gas-adjustment ${shellQuote(opts.gasAdjustment)} --gas-prices 10ubadge \\`,
     '    --yes'
-  ];
+  );
+  return lines;
 }
 
 /**
@@ -379,6 +401,8 @@ export interface KeyringMultiCommandOptions {
   network: 'mainnet' | 'testnet' | 'local';
   binary: string;
   keyringBackend: string;
+  keyringDir?: string;
+  home?: string;
   gas: string;
   gasAdjustment: string;
   manager?: string;
